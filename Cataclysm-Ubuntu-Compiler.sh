@@ -81,12 +81,12 @@ then
       unzip white-rabbit.zip
       sudo mv whitrabt.ttf /usr/local/share/fonts/
       cd .. && rm -r temp
-      echo "xterm*faceName: White Rabbit" > .Xresources
-      echo "xterm*faceSize: 14" >> ~/.Xresources
-      echo "xterm*locale: true" >> ~/.Xresources
-      echo "xterm*loginshell: true" >> ~/.Xresources
-      echo "xterm*saveLines: 4096" >> ~/.Xresources
-      echo "xterm*showBlinkAsBold: true" >> ~/.Xresources
+      echo "xterm*faceName: White Rabbit" > $LAUNCHER/backups/game-font
+      echo "xterm*faceSize: 14" >> $LAUNCHER/backups/game-font
+      echo "xterm*locale: true" >> $LAUNCHER/backups/game-font
+      echo "xterm*loginshell: true" >> $LAUNCHER/backups/game-font
+      echo "xterm*saveLines: 4096" >> $LAUNCHER/backups/game-font
+      echo "xterm*showBlinkAsBold: true" >> $LAUNCHER/backups/game-font
 
       echo "#!/bin/bash" > $LAUNCHER/cataclysm-launcher.sh
       echo "LAUNCHDIRECTORY=$LAUNCHER" >> $LAUNCHER/cataclysm-launcher.sh
