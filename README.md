@@ -1,4 +1,4 @@
-# CDDA-Linux-Launcher
+# CDDA-Ubuntu-Launcher
 A [Cataclysm: Dark Days Ahead](https://cataclysmdda.org/) launcher for Linux
 
 ## Goal
