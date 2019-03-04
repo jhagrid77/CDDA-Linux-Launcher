@@ -81,7 +81,12 @@ then
       unzip white-rabbit.zip
       sudo mv whitrabt.ttf /usr/local/share/fonts/
       cd .. && rm -r temp
-
+      echo "xterm*faceName: White Rabbit" > .Xresources
+      echo "xterm*faceSize: 14" >> .Xresources
+      echo "xterm*locale: true" >> .Xresources
+      echo "xterm*loginshell: true" >> .Xresources
+      echo "xterm*saveLines: 4096" >> .Xresources
+      echo "xterm*showBlinkAsBold: true" >> .Xresources
 
       echo "#!/bin/bash" >> $LAUNCHER/cataclysm-launcher.sh
       echo "LAUNCHDIRECTORY=\$LAUNCHER" >> $LAUNCHER/cataclysm-launcher.sh
@@ -97,6 +102,8 @@ then
       echo "then" >> $LAUNCHER/cataclysm-launcher.sh
       echo "  echo 'Restoring regular font.'" >> $LAUNCHER/cataclysm-launcher.sh
       echo "  cp \$LAUNCHDIRECTORY/backups/regular-font ~/.Xresources" >> $LAUNCHER/cataclysm-launcher.sh
+      echo "else"
+      echo "  rm ~/.Xresources"
       echo "fi" >> $LAUNCHER/cataclysm-launcher.sh
       echo "unset LAUNCHDIRECTORY" >> $LAUNCHER/cataclysm-launcher.sh
       echo "unset GAMEDIRECTORY" >> $LAUNCHER/cataclysm-launcher.sh
