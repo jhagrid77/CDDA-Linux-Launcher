@@ -88,7 +88,7 @@ then
       echo "xterm*saveLines: 4096" >> ~/.Xresources
       echo "xterm*showBlinkAsBold: true" >> ~/.Xresources
 
-      echo "#!/bin/bash" >> $LAUNCHER/cataclysm-launcher.sh
+      echo "#!/bin/bash" > $LAUNCHER/cataclysm-launcher.sh
       echo "LAUNCHDIRECTORY=$LAUNCHER" >> $LAUNCHER/cataclysm-launcher.sh
       echo "GAMEDIRECTORY=$(pwd)/Cataclysm-DDA" >> $LAUNCHER/cataclysm-launcher.sh
       echo "if [ -f ~/.Xresources ]" >> $LAUNCHER/cataclysm-launcher.sh
@@ -107,6 +107,7 @@ then
       echo "fi" >> $LAUNCHER/cataclysm-launcher.sh
       echo "unset LAUNCHDIRECTORY" >> $LAUNCHER/cataclysm-launcher.sh
       echo "unset GAMEDIRECTORY" >> $LAUNCHER/cataclysm-launcher.sh
+      chmod +x $LAUNCHER/cataclysm-launcher.sh
     fi
   fi
   echo "Downloading Cataclysm: DDA."
