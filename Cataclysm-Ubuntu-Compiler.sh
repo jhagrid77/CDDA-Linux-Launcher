@@ -36,8 +36,7 @@ then
       echo "echo 'Backing up current font.'" >> $LAUNCHER/cataclysm-launcher.sh
       echo "sudo cp /etc/default/console-setup \$LAUNCHDIRECTORY/backups/regular-font" >> $LAUNCHER/cataclysm-launcher.sh
       echo "sudo cp \$LAUNCHDIRECTORY/backups/game-font /etc/default/console-setup" >> $LAUNCHER/cataclysm-launcher.sh
-      echo "cd \$GAMEDIRECTORY; ./cataclysm & PID=\$!" >> $LAUNCHER/cataclysm-launcher.sh
-      echo "wait \$PID" >> $LAUNCHER/cataclysm-launcher.sh
+      echo "cd \$GAMEDIRECTORY; ./cataclysm" >> $LAUNCHER/cataclysm-launcher.sh
       echo "sudo cp \$LAUNCHDIRECTORY/backups/regular-font /etc/default/console-setup" >> $LAUNCHER/cataclysm-launcher.sh
       echo "unset LAUNCHDIRECTORY" >> $LAUNCHER/cataclysm-launcher.sh
       echo "unset GAMEDIRECTORY" >> $LAUNCHER/cataclysm-launcher.sh
@@ -93,8 +92,7 @@ then
       echo "  cp ~/.Xresources \$LAUNCHDIRECTORY/backups/regular-font" >> $LAUNCHER/cataclysm-launcher.sh
       echo "fi" >> $LAUNCHER/cataclysm-launcher.sh
       echo "sudo cp \$LAUNCHDIRECTORY/backups/game-font ~/.Xresources" >> $LAUNCHER/cataclysm-launcher.sh
-      echo "cd \$GAMEDIRECTORY; ./cataclysm-launcher & PID=\$!" >> $LAUNCHER/cataclysm-launcher.sh
-      echo "wait \$PID" >> $LAUNCHER/cataclysm-launcher.sh
+      echo "cd \$GAMEDIRECTORY; ./cataclysm-launcher" >> $LAUNCHER/cataclysm-launcher.sh
       echo "if [ -f \$LAUNCHDIRECTORY/backups/regular-font ]" >> $LAUNCHER/cataclysm-launcher.sh
       echo "then" >> $LAUNCHER/cataclysm-launcher.sh
       echo "  echo 'Restoring regular font.'" >> $LAUNCHER/cataclysm-launcher.sh
