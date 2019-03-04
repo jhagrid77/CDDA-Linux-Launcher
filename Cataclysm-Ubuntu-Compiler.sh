@@ -102,8 +102,8 @@ then
       echo "then" >> $LAUNCHER/cataclysm-launcher.sh
       echo "  echo 'Restoring regular font.'" >> $LAUNCHER/cataclysm-launcher.sh
       echo "  cp \$LAUNCHDIRECTORY/backups/regular-font ~/.Xresources" >> $LAUNCHER/cataclysm-launcher.sh
-      echo "else"
-      echo "  rm ~/.Xresources"
+      echo "else" >> $LAUNCHER/cataclysm-launcher.sh
+      echo "  rm ~/.Xresources" >> $LAUNCHER/cataclysm-launcher.sh
       echo "fi" >> $LAUNCHER/cataclysm-launcher.sh
       echo "unset LAUNCHDIRECTORY" >> $LAUNCHER/cataclysm-launcher.sh
       echo "unset GAMEDIRECTORY" >> $LAUNCHER/cataclysm-launcher.sh
