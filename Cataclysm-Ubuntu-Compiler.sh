@@ -21,17 +21,17 @@ then
         LAUNCHER=$(pwd)
       fi
       mkdir $LAUNCHER/backups
-      echo -e 'ACTIVE_CONSOLES="/dev/tty[1-6]"\n' > $LAUNCHER/backups/game-font
-      echo -e 'CHARMAP="UTF-8"\n' >> $LAUNCHER/backups/game-font
-      echo 'CODESET="guess"' >> $LAUNCHER/backups/game-font
-      echo 'FONTFACE="Terminus"' >> $LAUNCHER/backups/game-font
-      echo -e 'FONTSIZE="14x28"\n' >> $LAUNCHER/backups/game-font
-      echo 'VIDEOMODE=' >> $LAUNCHER/backups/game-font
-      sudo chown root:root $LAUNCHER/backups/game-font
+      sudo echo -e 'ACTIVE_CONSOLES="/dev/tty[1-6]"\n' | sudo tee $LAUNCHER/backups/game-font
+      sudo echo -e 'CHARMAP="UTF-8"\n' | sudo tee -a $LAUNCHER/backups/game-font
+      sudo echo 'CODESET="guess"' | sudo tee -a $LAUNCHER/backups/game-font
+      sudo echo 'FONTFACE="Terminus"' | sudo tee -a $LAUNCHER/backups/game-font
+      sudo echo -e 'FONTSIZE="14x28"\n' | sudo tee -a $LAUNCHER/backups/game-font
+      sudo echo 'VIDEOMODE=' | sudo tee -a $LAUNCHER/backups/game-font
+       sudo chown root:root $LAUNCHER/backups/game-font
       sudo chmod 644 $LAUNCHER/backups/game-font
 
       echo "#!/bin/bash" > $LAUNCHER/cataclysm-launcher.sh
-      echo "LAUNCHDIRECTORY=\$LAUNCHER" >> $LAUNCHER/cataclysm-launcher.sh
+      echo "LAUNCHDIRECTORY=$LAUNCHER" >> $LAUNCHER/cataclysm-launcher.sh
       echo "GAMEDIRECTORY=$(pwd)/Cataclysm-DDA"
       echo "echo 'Backing up current font.'" >> $LAUNCHER/cataclysm-launcher.sh
       echo "sudo cp /etc/default/console-setup \$LAUNCHDIRECTORY/backups/regular-font" >> $LAUNCHER/cataclysm-launcher.sh
@@ -99,8 +99,8 @@ then
       echo "  echo 'Restoring regular font.'" >> $LAUNCHER/cataclysm-launcher.sh
       echo "  cp \$LAUNCHDIRECTORY/backups/regular-font ~/.Xresources"
       echo "fi" >> $LAUNCHER/cataclysm-launcher.sh
-      echo "unset \LAUNCHDIRECTORY" >> $LAUNCHER/cataclysm-launcher.sh
-      echo "unset \GAMEDIRECTORY" >> $LAUNCHER/cataclysm-launcher.sh
+      echo "unset LAUNCHDIRECTORY" >> $LAUNCHER/cataclysm-launcher.sh
+      echo "unset GAMEDIRECTORY" >> $LAUNCHER/cataclysm-launcher.sh
     fi
   fi
   echo "Downloading Cataclysm: DDA."
