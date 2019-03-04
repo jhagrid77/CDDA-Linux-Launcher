@@ -21,26 +21,27 @@ then
         LAUNCHER=$(pwd)
       fi
       mkdir $LAUNCHER/backups
-      sudo echo -e 'ACTIVE_CONSOLES="/dev/tty[1-6]"\n' | sudo tee $LAUNCHER/backups/game-font
-      sudo echo -e 'CHARMAP="UTF-8"\n' | sudo tee -a $LAUNCHER/backups/game-font
-      sudo echo 'CODESET="guess"' | sudo tee -a $LAUNCHER/backups/game-font
-      sudo echo 'FONTFACE="Terminus"' | sudo tee -a $LAUNCHER/backups/game-font
-      sudo echo -e 'FONTSIZE="14x28"\n' | sudo tee -a $LAUNCHER/backups/game-font
-      sudo echo 'VIDEOMODE=' | sudo tee -a $LAUNCHER/backups/game-font
-       sudo chown root:root $LAUNCHER/backups/game-font
+      sudo echo -e 'ACTIVE_CONSOLES="/dev/tty[1-6]"\n' | sudo tee $LAUNCHER/backups/game-font 1> /dev/null
+      sudo echo -e 'CHARMAP="UTF-8"\n' | sudo tee -a $LAUNCHER/backups/game-font 1> /dev/null
+      sudo echo 'CODESET="guess"' | sudo tee -a $LAUNCHER/backups/game-font 1> /dev/null
+      sudo echo 'FONTFACE="Terminus"' | sudo tee -a $LAUNCHER/backups/game-font 1> /dev/null
+      sudo echo -e 'FONTSIZE="14x28"\n' | sudo tee -a $LAUNCHER/backups/game-font 1> /dev/null
+      sudo echo 'VIDEOMODE=' | sudo tee -a $LAUNCHER/backups/game-font 1> /dev/null
+      sudo chown root:root $LAUNCHER/backups/game-font
       sudo chmod 644 $LAUNCHER/backups/game-font
 
       echo "#!/bin/bash" > $LAUNCHER/cataclysm-launcher.sh
       echo "LAUNCHDIRECTORY=$LAUNCHER" >> $LAUNCHER/cataclysm-launcher.sh
-      echo "GAMEDIRECTORY=$(pwd)/Cataclysm-DDA"
+      echo "GAMEDIRECTORY=$(pwd)/Cataclysm-DDA" >> $LAUNCHER/cataclysm-launcher.sh
       echo "echo 'Backing up current font.'" >> $LAUNCHER/cataclysm-launcher.sh
       echo "sudo cp /etc/default/console-setup \$LAUNCHDIRECTORY/backups/regular-font" >> $LAUNCHER/cataclysm-launcher.sh
       echo "sudo cp \$LAUNCHDIRECTORY/backups/game-font /etc/default/console-setup" >> $LAUNCHER/cataclysm-launcher.sh
       echo "cd \$GAMEDIRECTORY; ./cataclysm & PID=\$!" >> $LAUNCHER/cataclysm-launcher.sh
       echo "wait \$PID" >> $LAUNCHER/cataclysm-launcher.sh
       echo "sudo cp \$LAUNCHDIRECTORY/backups/regular-font /etc/default/console-setup" >> $LAUNCHER/cataclysm-launcher.sh
-      echo "unset \LAUNCHDIRECTORY" >> $LAUNCHER/cataclysm-launcher.sh
-      echo "unset \GAMEDIRECTORY" >> $LAUNCHER/cataclysm-launcher.sh
+      echo "unset LAUNCHDIRECTORY" >> $LAUNCHER/cataclysm-launcher.sh
+      echo "unset GAMEDIRECTORY" >> $LAUNCHER/cataclysm-launcher.sh
+      chmod +x $LAUNCHER/cataclysm-launcher.sh
     fi
   elif [[ ( "$VERSION" = 'T' ) || ( "$VERSION" = 't' ) ]]
   then
@@ -83,9 +84,9 @@ then
       cd .. && rm -r temp
 
 
-      echo "#!/bin/bash" > $LAUNCHER/cataclysm-launcher.sh
+      echo "#!/bin/bash" >> $LAUNCHER/cataclysm-launcher.sh
       echo "LAUNCHDIRECTORY=\$LAUNCHER" >> $LAUNCHER/cataclysm-launcher.sh
-      echo "GAMEDIRECTORY=$(pwd)/Cataclysm-DDA" >> $LAUNCHER/cataclysm-launcher.sh
+      echo "GAMEDIRECTORY='$(pwd)'/Cataclysm-DDA" >> $LAUNCHER/cataclysm-launcher.sh
       echo "if [ -f ~/.Xresources ]" >> $LAUNCHER/cataclysm-launcher.sh
       echo "then" >> $LAUNCHER/cataclysm-launcher.sh
       echo "  echo 'Backing up current font.'" >> $LAUNCHER/cataclysm-launcher.sh
@@ -97,7 +98,7 @@ then
       echo "if [ -f \$LAUNCHDIRECTORY/backups/regular-font ]" >> $LAUNCHER/cataclysm-launcher.sh
       echo "then" >> $LAUNCHER/cataclysm-launcher.sh
       echo "  echo 'Restoring regular font.'" >> $LAUNCHER/cataclysm-launcher.sh
-      echo "  cp \$LAUNCHDIRECTORY/backups/regular-font ~/.Xresources"
+      echo "  cp \$LAUNCHDIRECTORY/backups/regular-font ~/.Xresources" >> $LAUNCHER/cataclysm-launcher.sh
       echo "fi" >> $LAUNCHER/cataclysm-launcher.sh
       echo "unset LAUNCHDIRECTORY" >> $LAUNCHER/cataclysm-launcher.sh
       echo "unset GAMEDIRECTORY" >> $LAUNCHER/cataclysm-launcher.sh
