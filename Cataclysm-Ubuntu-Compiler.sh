@@ -54,7 +54,7 @@ then
       echo ""
       if [[ ( "$GUI" = 'Y' ) || ( "$GUI" = 'y' ) ]]
       then
-        sudo apt-get update && sudo apt-get install i3 lightdm xinit -y
+        sudo apt-get update && sudo apt-get install i3 lightdm xinit x11-server-utils zip -y
       elif  [[ ( "$GUI" = 'N' ) || ( "$GUI" = 'n' ) ]]
       then
         echo "Sorry, the Tiles version of C:DDA cannot work without a GUI."
@@ -82,15 +82,15 @@ then
       sudo mv whitrabt.ttf /usr/local/share/fonts/
       cd .. && rm -r temp
       echo "xterm*faceName: White Rabbit" > .Xresources
-      echo "xterm*faceSize: 14" >> .Xresources
-      echo "xterm*locale: true" >> .Xresources
-      echo "xterm*loginshell: true" >> .Xresources
-      echo "xterm*saveLines: 4096" >> .Xresources
-      echo "xterm*showBlinkAsBold: true" >> .Xresources
+      echo "xterm*faceSize: 14" >> ~/.Xresources
+      echo "xterm*locale: true" >> ~/.Xresources
+      echo "xterm*loginshell: true" >> ~/.Xresources
+      echo "xterm*saveLines: 4096" >> ~/.Xresources
+      echo "xterm*showBlinkAsBold: true" >> ~/.Xresources
 
       echo "#!/bin/bash" >> $LAUNCHER/cataclysm-launcher.sh
-      echo "LAUNCHDIRECTORY=\$LAUNCHER" >> $LAUNCHER/cataclysm-launcher.sh
-      echo "GAMEDIRECTORY='$(pwd)'/Cataclysm-DDA" >> $LAUNCHER/cataclysm-launcher.sh
+      echo "LAUNCHDIRECTORY=$LAUNCHER" >> $LAUNCHER/cataclysm-launcher.sh
+      echo "GAMEDIRECTORY=$(pwd)/Cataclysm-DDA" >> $LAUNCHER/cataclysm-launcher.sh
       echo "if [ -f ~/.Xresources ]" >> $LAUNCHER/cataclysm-launcher.sh
       echo "then" >> $LAUNCHER/cataclysm-launcher.sh
       echo "  echo 'Backing up current font.'" >> $LAUNCHER/cataclysm-launcher.sh
@@ -162,3 +162,4 @@ unset VERSION
 unset FONT
 unset LAUNCHER
 unset UPDATE
+unset GUI
