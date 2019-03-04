@@ -1,20 +1,20 @@
 #!/bin/bash
 
-read -n 1 -p  "Would you like to install Cataclysm: Dark Days Ahead? You can choose to install the updater script either way. (Please enter Y or N)" INSTALL
+read -n 1 -p  "Would you like to install Cataclysm: Dark Days Ahead? You can choose to install the updater script either way. (Please enter Y or N): " INSTALL
 echo ""
 if [[ ( "$INSTALL" = 'Y' ) || ( "$INSTALL" = 'y' ) ]]
 then
-  read -n 1 -p "Would you like to install the [N]curses or [T]iles version? (Please enter N or T)" VERSION
+  read -n 1 -p "Would you like to install the [N]curses or [T]iles version? (Please enter N or T): " VERSION
   echo ""
   if [[ ( "$VERSION" = 'N' ) || ( "$VERSION" = 'n' ) ]]
   then
     echo "Installing needed dependencies."
     sudo apt-get update && sudo apt-get install astyle build-essential ccache clang git libglib2.0-dev liblua5.2-0 liblua5.2-dev libncurses5-dev libncursesw5-dev lua5.2 tmux -y
-    read -n 1 -p "Would you like to choose a different font to use for the game? Doing so will create a launcher for you (Please enter Y or N)" FONT
+    read -n 1 -p "Would you like to choose a different font to use for the game? Doing so will create a launcher for you (Please enter Y or N): " FONT
     echo ""
     if [[ ( "$FONT" = 'Y' ) || ( "$FONT" = 'y' ) ]]
     then
-      read -p "Please enter the absolute path you would like the launcher to be placed. If left blank, it will be placed in the current directory" LAUNCHER
+      read -p "Please enter the absolute path you would like the launcher to be placed. If left blank, it will be placed in the current directory: " LAUNCHER
       echo ""
       if [ -z $LAUNCHER ]
       then
@@ -50,7 +50,7 @@ then
     if [ "$GRAPHICS" != "ii" ]
     then
       echo "It would appear that you do not have a graphical environment installed."
-      read -n 1 -p "Would you like to install one now so you can play the Tiles version? (Please enter Y or N.) (If you select Y, then i3WM and Xorg will be installed)" GUI
+      read -n 1 -p "Would you like to install one now so you can play the Tiles version? (Please enter Y or N.) (If you select Y, then i3WM and Xorg will be installed): " GUI
       echo ""
       if [[ ( "$GUI" = 'Y' ) || ( "$GUI" = 'y' ) ]]
       then
@@ -61,11 +61,11 @@ then
         exit
       fi
     fi
-    read -n 1 -p "Would you like to choose a different font to use for the game? Doing so will create a launcher for you (Please enter Y or N)" FONT
+    read -n 1 -p "Would you like to choose a different font to use for the game? Doing so will create a launcher for you (Please enter Y or N): " FONT
     echo ""
     if [[ ( "$FONT" = 'Y' ) || ( "$FONT" = 'y' ) ]]
     then
-      read -p "Please enter the absolute path you would like the launcher to be placed. If left blank, it will be placed in the current directory" LAUNCHER
+      read -p "Please enter the absolute path you would like the launcher to be placed. If left blank, it will be placed in the current directory: " LAUNCHER
       echo ""
       if [ -z $LAUNCHER ]
       then
@@ -118,13 +118,13 @@ then
   fi
 fi
 
-read -n 1 -p "Would you like to create an update script for Cataclysm: Dark Days Ahead?" UPDATE
+read -n 1 -p "Would you like to create an update script for Cataclysm: Dark Days Ahead?: " UPDATE
 echo ""
 if [[ ( "$UPDATE" = 'Y' ) || ( "$UPDATE" = 'y' )]]
 then
   if [ -z $LAUNCHER ]
   then
-    read -p "Please enter the absolute path you would like the updater to be placed. If left blank, it will be placed in the current directory" LAUNCHER
+    read -p "Please enter the absolute path you would like the updater to be placed. If left blank, it will be placed in the current directory: " LAUNCHER
     echo ""
     if [ -z $LAUNCHER ]
     then
@@ -133,7 +133,7 @@ then
   fi
   if [ -z $VERSION ]
   then
-    read -n 1 -p "Would you like to install the updater for the [N]curses or [T]iles version? (Please enter N or T)" VERSION
+    read -n 1 -p "Would you like to install the updater for the [N]curses or [T]iles version? (Please enter N or T): " VERSION
     echo ""
   fi
   echo "#!/bin/bash" > $LAUNCHER/cataclysm-updater.sh
