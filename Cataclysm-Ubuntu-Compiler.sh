@@ -6,10 +6,18 @@ then
 elif type pacman >/dev/null 2>&1
 then
   OS=Arch
-  #elif type rpm >/dev/null 2>&1
+elif type dnf >/dev/null 2>&1
+then
+  OS=RPM-DNF
+  #elif type zypper >/dev/null 2>&1
   #then
-  #  OS=RPM
+  #  OS=RPM-ZYPPER
+elif type yum >/dev/null 2>&1
+then
+  OS=RPM-YUM
 fi
+
+ARCH=$(arch)
 
 read -n 1 -p  "Would you like to install Cataclysm: Dark Days Ahead? You can choose to install the updater script either way. (Please enter Y or N): " INSTALL
 echo ""
@@ -25,9 +33,27 @@ then
       sudo apt-get update && sudo apt-get install astyle build-essential ccache clang git libglib2.0-dev liblua5.3-dev libncurses5-dev libncursesw5-dev lua5.3 zip -y
   elif [ "$OS" = "Arch" ]
     then
-      sudo pacman -Syy && sudo pacman -S astyle ccache clang git glib2 lua lua52 ncurses zip
-      #elif [ "$OS" = "RPM" ]
+      sudo pacman -Syy && sudo pacman -S astyle ccache clang git glib2 lua ncurses zip
+  elif [ "$OS" = "RPM-DNF" ]
+    then
+      if [ "$ARCH" = 'x86_64' ]
+      then
+        sudo dnf install astyle.$ARCH ccache.$ARCH clang.$ARCH git.$ARCH glib2.$ARCH lua.$ARCH lua-devel.$ARCH ncurses-devel.$ARCH zip.$ARCH
+    elif [ "$ARCH" = 'i686' ]
+      then
+        sudo dnf install astyle.$ARCH clang.$ARCH git.$ARCH glib2.$ARCH lua.$ARCH lua-devel.$ARCH ncurses-devel.$ARCH zip.$ARCH
+      fi
+      #elif [ "$OS" = "RPM-ZYPPER" ]
       #then
+  elif [ "$OS" = "RPM-YUM" ]
+    then
+      if [ "$ARCH" = 'x86_64' ]
+      then
+        sudo yum install astyle.$ARCH ccache.$ARCH clang.$ARCH git.$ARCH glib2.$ARCH lua.$ARCH lua-devel.$ARCH ncurses-devel.$ARCH zip.$ARCH
+    elif [ "$ARCH" = 'i686' ]
+      then
+        sudo yum install astyle.$ARCH clang.$ARCH git.$ARCH glib2.$ARCH lua.$ARCH lua-devel.$ARCH ncurses-devel.$ARCH zip.$ARCH
+      fi
     fi
     read -n 1 -p "Would you like to choose a different font to use for the game? Doing so will create a launcher for you (Please enter Y or N): " FONT
     echo ""
@@ -40,12 +66,31 @@ then
         LAUNCHER=$(pwd)
       fi
       mkdir $LAUNCHER/backups
-      sudo echo -e 'ACTIVE_CONSOLES="/dev/tty[1-6]"\n' | sudo tee $LAUNCHER/backups/game-font 1> /dev/null
-      sudo echo -e 'CHARMAP="UTF-8"\n' | sudo tee -a $LAUNCHER/backups/game-font 1> /dev/null
-      sudo echo 'CODESET="guess"' | sudo tee -a $LAUNCHER/backups/game-font 1> /dev/null
-      sudo echo 'FONTFACE="Terminus"' | sudo tee -a $LAUNCHER/backups/game-font 1> /dev/null
-      sudo echo -e 'FONTSIZE="14x28"\n' | sudo tee -a $LAUNCHER/backups/game-font 1> /dev/null
-      sudo echo 'VIDEOMODE=' | sudo tee -a $LAUNCHER/backups/game-font 1> /dev/null
+      if [ -f /etc/default/console-setup ]
+      then
+        sudo echo -e 'ACTIVE_CONSOLES="/dev/tty[1-6]"\n' | sudo tee $LAUNCHER/backups/game-font 1> /dev/null
+        sudo echo -e 'CHARMAP="UTF-8"\n' | sudo tee -a $LAUNCHER/backups/game-font 1> /dev/null
+        sudo echo 'CODESET="guess"' | sudo tee -a $LAUNCHER/backups/game-font 1> /dev/null
+        sudo echo 'FONTFACE="Terminus"' | sudo tee -a $LAUNCHER/backups/game-font 1> /dev/null
+        sudo echo -e 'FONTSIZE="14x28"\n' | sudo tee -a $LAUNCHER/backups/game-font 1> /dev/null
+        sudo echo 'VIDEOMODE=' | sudo tee -a $LAUNCHER/backups/game-font 1> /dev/null
+    elif [ -f /etc/vconsole.conf ]
+      then
+        if [ "$OS" = 'RPM-DNF' ]
+        then
+          sudo dnf install terminus-fonts-console
+          #elif [ "$OS" = 'RPM-ZYPPER' ]
+          #then
+      elif [ "$OS" = 'RPM-YUM' ]
+        then
+          sudo yum install terminus-fonts-console
+      elif [ "$OS" = 'Arch' ]
+        then
+          sudo pacman -S terminus-font
+        fi
+        sudo echo 'KEYMAP="us"' | sudo tee $LAUNCHER/backups/game-font 1> /dev/null
+        sudo echo 'FONT="ter-v32n"' | sudo tee -a $LAUNCHER/backups/game-font 1> /dev/null
+      fi
       sudo chown root:root $LAUNCHER/backups/game-font
       sudo chmod 644 $LAUNCHER/backups/game-font
 
@@ -53,10 +98,25 @@ then
       echo "LAUNCHDIRECTORY=$LAUNCHER" >> $LAUNCHER/cataclysm-launcher.sh
       echo "GAMEDIRECTORY=$(pwd)/Cataclysm-DDA" >> $LAUNCHER/cataclysm-launcher.sh
       echo "echo 'Backing up current font.'" >> $LAUNCHER/cataclysm-launcher.sh
-      echo "sudo cp /etc/default/console-setup \$LAUNCHDIRECTORY/backups/regular-font" >> $LAUNCHER/cataclysm-launcher.sh
-      echo "sudo cp \$LAUNCHDIRECTORY/backups/game-font /etc/default/console-setup" >> $LAUNCHER/cataclysm-launcher.sh
+      if [ -f /etc/default/console-setup ]
+      then
+        echo "sudo cp /etc/default/console-setup \$LAUNCHDIRECTORY/backups/regular-font" >> $LAUNCHER/cataclysm-launcher.sh
+        echo "sudo cp \$LAUNCHDIRECTORY/backups/game-font /etc/default/console-setup" >> $LAUNCHER/cataclysm-launcher.sh
+    elif [ -f /etc/vconsole.conf ]
+      then
+        echo "sudo cp /etc/vconsole.conf \$LAUNCHDIRECTORY/backups/regular-font">> $LAUNCHER/cataclysm-launcher.sh
+        echo "sudo cp \$LAUNCHDIRECTORY/backups/game-font /etc/vconsole.conf" >> $LAUNCHER/cataclysm-launcher.sh
+        echo "sudo systemctl restart systemd-vconsole-setup.service" >> $LAUNCHER/cataclysm-launcher.sh
+      fi
       echo "cd \$GAMEDIRECTORY; ./cataclysm" >> $LAUNCHER/cataclysm-launcher.sh
-      echo "sudo cp \$LAUNCHDIRECTORY/backups/regular-font /etc/default/console-setup" >> $LAUNCHER/cataclysm-launcher.sh
+      if [ -f /etc/default/console-setup ]
+      then
+        echo "sudo cp \$LAUNCHDIRECTORY/backups/regular-font /etc/default/console-setup" >> $LAUNCHER/cataclysm-launcher.sh
+    elif [ -f /etc/vconsole.conf ]
+      then
+        echo "sudo cp \$LAUNCHDIRECTORY/backups/regular-font /etc/vconsole.conf" >> $LAUNCHER/cataclysm-launcher.sh
+        echo "sudo systemctl restart systemd-vconsole-setup.service" >> $LAUNCHER/cataclysm-launcher.sh
+      fi
       echo "unset LAUNCHDIRECTORY" >> $LAUNCHER/cataclysm-launcher.sh
       echo "unset GAMEDIRECTORY" >> $LAUNCHER/cataclysm-launcher.sh
       chmod +x $LAUNCHER/cataclysm-launcher.sh
@@ -70,8 +130,26 @@ elif [[ ( "$VERSION" = 'T' ) || ( "$VERSION" = 't' ) ]]
   elif [ "$OS" = 'Arch' ]
     then
       sudo pacman -Syy && sudo pacman -S base-devel bzip2 ccache clang freetype2 gcc-libs git glibc lua sdl2 sdl2_image sdl2_mixer sdl2_ttf zip zlib
-      #elif [ "$OS" = 'RPM' ]
+  elif [ "$OS" = 'RPM-DNF' ]
+    then
+      if [ "$ARCH" = 'x86_64' ]
+      then
+        sudo dnf install bzip2.$ARCH ccache.$ARCH clang.$ARCH freetype.$ARCH git.$ARCH glibc.$ARCH lua.$ARCH SDL2-devel.$ARCH SDL2_image-devel.$ARCH SDL2_mixer-devel.$ARCH SDL2_ttf-devel.$ARCH zip.$ARCH
+    elif [ "$ARCH" = 'i686' ]
+      then
+        sudo dnf install clang.$ARCH freetype.$ARCH git.$ARCH glibc.$ARCH lua.$ARCH SDL2-devel.$ARCH SDL2_image-devel.$ARCH SDL2_mixer-devel.$ARCH SDL2_ttf-devel.$ARCH zip.$ARCH
+      fi
+      #elif [ "$OS" = 'RPM-ZYPPER' ]
       #then
+  elif [ "$OS" = 'RPM-YUM' ]
+    then
+      if [ "$ARCH" = 'x86_64' ]
+      then
+        sudo yum install bzip2.$ARCH ccache.$ARCH clang.$ARCH freetype.$ARCH git.$ARCH glibc.$ARCH lua.$ARCH SDL2-devel.$ARCH SDL2_image-devel.$ARCH SDL2_mixer-devel.$ARCH SDL2_ttf-devel.$ARCH zip.$ARCH
+    elif [ "$ARCH" = 'i686' ]
+      then
+        sudo yum install clang.$ARCH freetype.$ARCH git.$ARCH glibc.$ARCH lua.$ARCH SDL2-devel.$ARCH SDL2_image-devel.$ARCH SDL2_mixer-devel.$ARCH SDL2_ttf-devel.$ARCH zip.$ARCH
+      fi
     fi
     if [ "$OS" = 'Debian' ]
     then
@@ -79,8 +157,15 @@ elif [[ ( "$VERSION" = 'T' ) || ( "$VERSION" = 't' ) ]]
   elif [ "$OS" = 'Arch' ]
     then
       GRAPHICS=$(pacman -Q | awk '{print $1}' | grep "xinit")
-      #elif [ "$OS" = 'RPM' ]
+  elif [ "$OS" = 'RPM-DNF' ]
+    then
+      GRAPHICS=$(dnf list installed | grep xinit | awk '{print $1}')
+      #elif [ "$OS" = 'RPM-ZYPPER' ]
       #then
+      #  GRAPHICS=$(rpm -qa | grep xinit | awk '{print $1}')
+  elif [ "$OS" = 'RPM-YUM' ]
+    then
+      GRAPHICS=$(yum list installed | grep xinit | awk '{print $1}')
     fi
     if ! [[ "$GRAPHICS" =~ xinit ]]
     then
@@ -92,12 +177,29 @@ elif [[ ( "$VERSION" = 'T' ) || ( "$VERSION" = 't' ) ]]
         if [ "$OS" = 'Debian' ]
         then
           sudo apt-get update && sudo apt-get install i3 lightdm xinit x11-server-utils -y
-        fi
-        if [ "$OS" = 'Arch' ]
+      elif [ "$OS" = 'Arch' ]
         then
           sudo pacman -Syy && sudo pacman -S i3 lightdm xinit
-          #elif [ "$OS" = 'RPM' ]
+      elif [ "$OS" = 'RPM-DNF' ]
+        then
+          if [ "$ARCH" = 'x86_64' ]
+          then
+            sudo dnf install i3.$ARCH lightdm.$ARCH
+        elif [ "$ARCH" = 'i686' ]
+          then
+            echo "Sorry, I couldn't find a way to install a GUI environment on a 32-bit system for!"
+          fi
+          #elif [ "$OS" = 'RPM-ZYPPER' ]
           #then
+      elif [ "$OS" = 'RPM-YUM' ]
+        then
+          if [ "$ARCH" = 'x86_64' ]
+          then
+            sudo yum install i3.$ARCH lightdm.$ARCH
+        elif [ "$ARCH" = 'i686' ]
+          then
+            echo "Sorry, I couldn't find a way to install a GUI environment on a 32-bit system for!"
+          fi
         fi
     elif  [[ ( "$GUI" = 'N' ) || ( "$GUI" = 'n' ) ]]
       then
@@ -123,7 +225,8 @@ elif [[ ( "$VERSION" = 'T' ) || ( "$VERSION" = 't' ) ]]
       wget https://www.fontsquirrel.com/fonts/download/white-rabbit
       mv white-rabbit white-rabbit.zip
       unzip white-rabbit.zip
-      sudo mv whitrabt.ttf /usr/local/share/fonts/
+      sudo mv whitrabt.ttf /usr/share/fonts/
+      fc-cache -f
       cd .. && rm -r temp
       echo "xterm*faceName: White Rabbit" > $LAUNCHER/backups/game-font
       echo "xterm*faceSize: 14" >> $LAUNCHER/backups/game-font
@@ -194,8 +297,16 @@ then
   echo "make clean" >> $LAUNCHER/cataclysm-updater.sh
   if [[ ( "$VERSION" = 'N' ) || ( "$VERSION" = 'n' ) ]]
   then
-    echo "make -s -j$(nproc --all) CLANG=1 CCACHE=1 RELEASE=1 LUA=1 USE_HOME_DIR=1" >> $LAUNCHER/cataclysm-updater.sh
-elif [[ ( "$VERSION" = 'T' ) || ( "$VERSION" = 't' ) ]]
+    if [[ "$OS" =~ 'RPM' ]]
+    then
+      if [ "$ARCH" = 'i686' ]
+      then
+        echo "make -s -j$(nproc --all) CLANG=1 RELEASE=1 LUA=1 USE_HOME_DIR=1" >> $LAUNCHER/cataclysm-updater.sh
+      fi
+    else
+      echo "make -s -j$(nproc --all) CLANG=1 CCACHE=1 RELEASE=1 LUA=1 USE_HOME_DIR=1" >> $LAUNCHER/cataclysm-updater.sh
+    fi
+  elif [[ ( "$VERSION" = 'T' ) || ( "$VERSION" = 't' ) ]]
   then
     echo "make -s -j$(nproc --all) CLANG=1 CCACHE=1 RELEASE=1 LUA=1 TILES=1 USE_HOME_DIR=1" >> $LAUNCHER/cataclysm-updater.sh
   fi
@@ -209,3 +320,4 @@ unset LAUNCHER
 unset UPDATE
 unset GUI
 unset OS
+unset GRAPHICS
