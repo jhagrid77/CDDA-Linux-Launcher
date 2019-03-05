@@ -1,5 +1,16 @@
 #!/bin/bash
 
+if type apt-get >/dev/null 2>&1
+then
+  OS=Debian
+elif type pacman >/dev/null 2>&1
+then
+  OS=Arch
+  #elif type rpm >/dev/null 2>&1
+  #then
+  #  OS=RPM
+fi
+
 read -n 1 -p  "Would you like to install Cataclysm: Dark Days Ahead? You can choose to install the updater script either way. (Please enter Y or N): " INSTALL
 echo ""
 if [[ ( "$INSTALL" = 'Y' ) || ( "$INSTALL" = 'y' ) ]]
@@ -9,7 +20,15 @@ then
   if [[ ( "$VERSION" = 'N' ) || ( "$VERSION" = 'n' ) ]]
   then
     echo "Installing needed dependencies."
-    sudo apt-get update && sudo apt-get install astyle build-essential ccache clang git libglib2.0-dev liblua5.2-0 liblua5.2-dev libncurses5-dev libncursesw5-dev lua5.2 tmux -y
+    if [ "$OS" = "Debian" ]
+    then
+      sudo apt-get update && sudo apt-get install astyle build-essential ccache clang git libglib2.0-dev liblua5.3-dev libncurses5-dev libncursesw5-dev lua5.3 zip -y
+  elif [ "$OS" = "Arch" ]
+    then
+      sudo pacman -Syy && sudo pacman -S astyle ccache clang git glib2 lua lua52 ncurses zip
+      #elif [ "$OS" = "RPM" ]
+      #then
+    fi
     read -n 1 -p "Would you like to choose a different font to use for the game? Doing so will create a launcher for you (Please enter Y or N): " FONT
     echo ""
     if [[ ( "$FONT" = 'Y' ) || ( "$FONT" = 'y' ) ]]
@@ -42,20 +61,45 @@ then
       echo "unset GAMEDIRECTORY" >> $LAUNCHER/cataclysm-launcher.sh
       chmod +x $LAUNCHER/cataclysm-launcher.sh
     fi
-  elif [[ ( "$VERSION" = 'T' ) || ( "$VERSION" = 't' ) ]]
+elif [[ ( "$VERSION" = 'T' ) || ( "$VERSION" = 't' ) ]]
   then
     echo "Installing needed dependencies."
-    sudo apt-get update && sudo apt-get install astyle build-essential ccache clang git libfreetype6-dev libglib2.0-dev liblua5.2-0 liblua5.2-dev libncurses5-dev libncursesw5-dev libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev lua5.2 -y
-    GRAPHICS=$(dpkg -l 2>/dev/null | grep "xserver-xorg" | tail -n 1 | awk '{print $1}')
-    if [ "$GRAPHICS" != "ii" ]
+    if [ "$OS" = 'Debian' ]
+    then
+      sudo apt-get update && sudo apt-get install build-essential ccache clang git libfreetype6-dev liblua5.3-dev libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev lua5.3 zip -y
+  elif [ "$OS" = 'Arch' ]
+    then
+      sudo pacman -Syy && sudo pacman -S base-devel bzip2 ccache clang freetype2 gcc-libs git glibc lua sdl2 sdl2_image sdl2_mixer sdl2_ttf zip zlib
+      #elif [ "$OS" = 'RPM' ]
+      #then
+    fi
+    if [ "$OS" = 'Debian' ]
+    then
+      GRAPHICS=$(dpkg -l 2>/dev/null | grep "xinit" | awk '{print $2}')
+  elif [ "$OS" = 'Arch' ]
+    then
+      GRAPHICS=$(pacman -Q | awk '{print $1}' | grep "xinit")
+      #elif [ "$OS" = 'RPM' ]
+      #then
+    fi
+    if ! [[ "$GRAPHICS" =~ xinit ]]
     then
       echo "It would appear that you do not have a graphical environment installed."
       read -n 1 -p "Would you like to install one now so you can play the Tiles version? (Please enter Y or N.) (If you select Y, then i3WM and Xorg will be installed): " GUI
       echo ""
       if [[ ( "$GUI" = 'Y' ) || ( "$GUI" = 'y' ) ]]
       then
-        sudo apt-get update && sudo apt-get install i3 lightdm xinit x11-server-utils zip -y
-      elif  [[ ( "$GUI" = 'N' ) || ( "$GUI" = 'n' ) ]]
+        if [ "$OS" = 'Debian' ]
+        then
+          sudo apt-get update && sudo apt-get install i3 lightdm xinit x11-server-utils -y
+        fi
+        if [ "$OS" = 'Arch' ]
+        then
+          sudo pacman -Syy && sudo pacman -S i3 lightdm xinit
+          #elif [ "$OS" = 'RPM' ]
+          #then
+        fi
+    elif  [[ ( "$GUI" = 'N' ) || ( "$GUI" = 'n' ) ]]
       then
         echo "Sorry, the Tiles version of C:DDA cannot work without a GUI."
         exit
@@ -119,7 +163,7 @@ then
   if [[ ( "$VERSION" = 'N' ) || ( "$VERSION" = 'n' ) ]]
   then
     make -s -j$(nproc --all) CLANG=1 CCACHE=1 RELEASE=1 LUA=1 USE_HOME_DIR=1
-  elif [[ ( "$VERSION" = 'T' ) || ( "$VERSION" = 't' ) ]]
+elif [[ ( "$VERSION" = 'T' ) || ( "$VERSION" = 't' ) ]]
   then
     make -s -j$(nproc --all) CLANG=1 CCACHE=1 RELEASE=1 LUA=1 TILES=1 USE_HOME_DIR=1
   fi
@@ -151,7 +195,7 @@ then
   if [[ ( "$VERSION" = 'N' ) || ( "$VERSION" = 'n' ) ]]
   then
     echo "make -s -j$(nproc --all) CLANG=1 CCACHE=1 RELEASE=1 LUA=1 USE_HOME_DIR=1" >> $LAUNCHER/cataclysm-updater.sh
-  elif [[ ( "$VERSION" = 'T' ) || ( "$VERSION" = 't' ) ]]
+elif [[ ( "$VERSION" = 'T' ) || ( "$VERSION" = 't' ) ]]
   then
     echo "make -s -j$(nproc --all) CLANG=1 CCACHE=1 RELEASE=1 LUA=1 TILES=1 USE_HOME_DIR=1" >> $LAUNCHER/cataclysm-updater.sh
   fi
@@ -164,3 +208,4 @@ unset FONT
 unset LAUNCHER
 unset UPDATE
 unset GUI
+unset OS
