@@ -30,7 +30,7 @@ then
     echo "Installing needed dependencies."
     if [ "$OS" = "Debian" ]
     then
-      sudo apt-get update && sudo apt-get install astyle build-essential ccache clang git libglib2.0-dev liblua5.3-dev libncurses5-dev libncursesw5-dev lua5.3 zip -y
+      sudo apt-get update && sudo apt-get install astyle build-essential ccache clang git libglib2.0-dev liblua5.2-devel liblua5.3-dev libncurses5-dev libncursesw5-dev lua5.2 lua5.3 zip -y
   elif [ "$OS" = "Arch" ]
     then
       sudo pacman -Syy && sudo pacman -S astyle ccache clang git glib2 lua ncurses zip
@@ -49,10 +49,10 @@ then
     then
       if [ "$ARCH" = 'x86_64' ]
       then
-        sudo yum install astyle.$ARCH ccache.$ARCH clang.$ARCH git.$ARCH glib2.$ARCH lua.$ARCH lua-devel.$ARCH ncurses-devel.$ARCH zip.$ARCH
+        sudo yum install astyle.$ARCH ccache.$ARCH clang.$ARCH git.$ARCH glib2.$ARCH lua.$ARCH lua-devel.$ARCH make.$ARCH ncurses-devel.$ARCH zip.$ARCH
     elif [ "$ARCH" = 'i686' ]
       then
-        sudo yum install astyle.$ARCH clang.$ARCH git.$ARCH glib2.$ARCH lua.$ARCH lua-devel.$ARCH ncurses-devel.$ARCH zip.$ARCH
+        sudo yum install astyle.$ARCH clang.$ARCH git.$ARCH glib2.$ARCH lua.$ARCH lua-devel.$ARCH make.$ARCH ncurses-devel.$ARCH zip.$ARCH
       fi
     fi
     read -n 1 -p "Would you like to choose a different font to use for the game? Doing so will create a launcher for you (Please enter Y or N): " FONT
@@ -126,7 +126,7 @@ elif [[ ( "$VERSION" = 'T' ) || ( "$VERSION" = 't' ) ]]
     echo "Installing needed dependencies."
     if [ "$OS" = 'Debian' ]
     then
-      sudo apt-get update && sudo apt-get install build-essential ccache clang git libfreetype6-dev liblua5.3-dev libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev lua5.3 zip -y
+      sudo apt-get update && sudo apt-get install build-essential ccache clang git libfreetype6-dev liblua5.2-dev liblua5.3-dev libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev lua5.2 lua5.3 zip -y
   elif [ "$OS" = 'Arch' ]
     then
       sudo pacman -Syy && sudo pacman -S base-devel bzip2 ccache clang freetype2 gcc-libs git glibc lua sdl2 sdl2_image sdl2_mixer sdl2_ttf zip zlib
@@ -134,10 +134,10 @@ elif [[ ( "$VERSION" = 'T' ) || ( "$VERSION" = 't' ) ]]
     then
       if [ "$ARCH" = 'x86_64' ]
       then
-        sudo dnf install bzip2.$ARCH ccache.$ARCH clang.$ARCH freetype.$ARCH git.$ARCH glibc.$ARCH lua.$ARCH SDL2-devel.$ARCH SDL2_image-devel.$ARCH SDL2_mixer-devel.$ARCH SDL2_ttf-devel.$ARCH zip.$ARCH
+        sudo dnf install bzip2.$ARCH ccache.$ARCH clang.$ARCH freetype.$ARCH git.$ARCH glibc.$ARCH lua.$ARCH make.$ARCH SDL2-devel.$ARCH SDL2_image-devel.$ARCH SDL2_mixer-devel.$ARCH SDL2_ttf-devel.$ARCH zip.$ARCH
     elif [ "$ARCH" = 'i686' ]
       then
-        sudo dnf install clang.$ARCH freetype.$ARCH git.$ARCH glibc.$ARCH lua.$ARCH SDL2-devel.$ARCH SDL2_image-devel.$ARCH SDL2_mixer-devel.$ARCH SDL2_ttf-devel.$ARCH zip.$ARCH
+        sudo dnf install clang.$ARCH freetype.$ARCH git.$ARCH glibc.$ARCH lua.$ARCH make.$ARCH SDL2-devel.$ARCH SDL2_image-devel.$ARCH SDL2_mixer-devel.$ARCH SDL2_ttf-devel.$ARCH zip.$ARCH
       fi
       #elif [ "$OS" = 'RPM-ZYPPER' ]
       #then
@@ -145,10 +145,10 @@ elif [[ ( "$VERSION" = 'T' ) || ( "$VERSION" = 't' ) ]]
     then
       if [ "$ARCH" = 'x86_64' ]
       then
-        sudo yum install bzip2.$ARCH ccache.$ARCH clang.$ARCH freetype.$ARCH git.$ARCH glibc.$ARCH lua.$ARCH SDL2-devel.$ARCH SDL2_image-devel.$ARCH SDL2_mixer-devel.$ARCH SDL2_ttf-devel.$ARCH zip.$ARCH
+        sudo yum install bzip2.$ARCH ccache.$ARCH clang.$ARCH freetype.$ARCH git.$ARCH glibc.$ARCH lua.$ARCH make.$ARCH SDL2-devel.$ARCH SDL2_image-devel.$ARCH SDL2_mixer-devel.$ARCH SDL2_ttf-devel.$ARCH zip.$ARCH
     elif [ "$ARCH" = 'i686' ]
       then
-        sudo yum install clang.$ARCH freetype.$ARCH git.$ARCH glibc.$ARCH lua.$ARCH SDL2-devel.$ARCH SDL2_image-devel.$ARCH SDL2_mixer-devel.$ARCH SDL2_ttf-devel.$ARCH zip.$ARCH
+        sudo yum install clang.$ARCH freetype.$ARCH git.$ARCH glibc.$ARCH lua.$ARCH make.$ARCH SDL2-devel.$ARCH SDL2_image-devel.$ARCH SDL2_mixer-devel.$ARCH SDL2_ttf-devel.$ARCH zip.$ARCH
       fi
     fi
     if [ "$OS" = 'Debian' ]
@@ -217,7 +217,10 @@ elif [[ ( "$VERSION" = 'T' ) || ( "$VERSION" = 't' ) ]]
       then
         LAUNCHER=$(pwd)
       fi
-      mkdir $LAUNCHER/backups
+      if [ -d $LAUNCHER/backups ]
+      then
+        mkdir $LAUNCHER/backups
+      fi
 
       echo "Installing new font."
       mkdir temp
@@ -226,7 +229,10 @@ elif [[ ( "$VERSION" = 'T' ) || ( "$VERSION" = 't' ) ]]
       mv white-rabbit white-rabbit.zip
       unzip white-rabbit.zip
       sudo mv whitrabt.ttf /usr/share/fonts/
-      fc-cache -f
+      if type fc-cache >/dev/null 2>&1
+      then
+        fc-cache -f
+      fi
       cd .. && rm -r temp
       echo "xterm*faceName: White Rabbit" > $LAUNCHER/backups/game-font
       echo "xterm*faceSize: 14" >> $LAUNCHER/backups/game-font
@@ -250,7 +256,7 @@ elif [[ ( "$VERSION" = 'T' ) || ( "$VERSION" = 't' ) ]]
       echo "  echo 'Restoring regular font.'" >> $LAUNCHER/cataclysm-launcher.sh
       echo "  cp \$LAUNCHDIRECTORY/backups/regular-font ~/.Xresources" >> $LAUNCHER/cataclysm-launcher.sh
       echo "else" >> $LAUNCHER/cataclysm-launcher.sh
-      echo "  rm ~/.Xresources" >> $LAUNCHER/cataclysm-launcher.sh
+      echo "  rm -f ~/.Xresources" >> $LAUNCHER/cataclysm-launcher.sh
       echo "fi" >> $LAUNCHER/cataclysm-launcher.sh
       echo "unset LAUNCHDIRECTORY" >> $LAUNCHER/cataclysm-launcher.sh
       echo "unset GAMEDIRECTORY" >> $LAUNCHER/cataclysm-launcher.sh
