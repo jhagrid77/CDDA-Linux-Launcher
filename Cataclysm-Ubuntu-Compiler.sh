@@ -17,7 +17,15 @@ then
   OS=RPM-YUM
 fi
 
-ARCH=$(arch)
+ARCH=$(uname -p)
+
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+  DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
 
 read -n 1 -p  "Would you like to install Cataclysm: Dark Days Ahead? You can choose to install the updater script either way. (Please enter Y or N): " INSTALL
 echo ""
@@ -63,7 +71,7 @@ then
       echo ""
       if [ -z $LAUNCHER ]
       then
-        LAUNCHER=$(pwd)
+        LAUNCHER=$DIR
       fi
       mkdir $LAUNCHER/backups
       if [ -f /etc/default/console-setup ]
@@ -96,7 +104,7 @@ then
 
       echo "#!/bin/bash" > $LAUNCHER/cataclysm-launcher.sh
       echo "LAUNCHDIRECTORY=$LAUNCHER" >> $LAUNCHER/cataclysm-launcher.sh
-      echo "GAMEDIRECTORY=$(pwd)/Cataclysm-DDA" >> $LAUNCHER/cataclysm-launcher.sh
+      echo "GAMEDIRECTORY=$DIR/Cataclysm-DDA" >> $LAUNCHER/cataclysm-launcher.sh
       echo "echo 'Backing up current font.'" >> $LAUNCHER/cataclysm-launcher.sh
       if [ -f /etc/default/console-setup ]
       then
@@ -153,21 +161,21 @@ elif [[ ( "$VERSION" = 'T' ) || ( "$VERSION" = 't' ) ]]
     fi
     if [ "$OS" = 'Debian' ]
     then
-      GRAPHICS=$(dpkg -l 2>/dev/null | grep "xinit" | awk '{print $2}')
+      GRAPHICS=$(dpkg -l 2>/dev/null | grep -E "xinit|wayland" | awk '{print $2}')
   elif [ "$OS" = 'Arch' ]
     then
-      GRAPHICS=$(pacman -Q | awk '{print $1}' | grep "xinit")
+      GRAPHICS=$(pacman -Q | awk '{print $1}' | grep -E "xinit\|wayland")
   elif [ "$OS" = 'RPM-DNF' ]
     then
-      GRAPHICS=$(dnf list installed | grep xinit | awk '{print $1}')
+      GRAPHICS=$(dnf list installed | grep -E "xinit|wayland" | awk '{print $1}')
       #elif [ "$OS" = 'RPM-ZYPPER' ]
       #then
       #  GRAPHICS=$(rpm -qa | grep xinit | awk '{print $1}')
   elif [ "$OS" = 'RPM-YUM' ]
     then
-      GRAPHICS=$(yum list installed | grep xinit | awk '{print $1}')
+      GRAPHICS=$(yum list installed | grep -E "xinit|wayland" | awk '{print $1}')
     fi
-    if ! [[ "$GRAPHICS" =~ xinit ]]
+    if ! [[ ( "$GRAPHICS" =~ xinit ) || ( "$GRAPHICS" =~ wayland ) ]]
     then
       echo "It would appear that you do not have a graphical environment installed."
       read -n 1 -p "Would you like to install one now so you can play the Tiles version? (Please enter Y or N.) (If you select Y, then i3WM and Xorg will be installed): " GUI
@@ -215,7 +223,7 @@ elif [[ ( "$VERSION" = 'T' ) || ( "$VERSION" = 't' ) ]]
       echo ""
       if [ -z $LAUNCHER ]
       then
-        LAUNCHER=$(pwd)
+        LAUNCHER=$DIR
       fi
       if [ -d $LAUNCHER/backups ]
       then
@@ -243,7 +251,7 @@ elif [[ ( "$VERSION" = 'T' ) || ( "$VERSION" = 't' ) ]]
 
       echo "#!/bin/bash" > $LAUNCHER/cataclysm-launcher.sh
       echo "LAUNCHDIRECTORY=$LAUNCHER" >> $LAUNCHER/cataclysm-launcher.sh
-      echo "GAMEDIRECTORY=$(pwd)/Cataclysm-DDA" >> $LAUNCHER/cataclysm-launcher.sh
+      echo "GAMEDIRECTORY=$DIR/Cataclysm-DDA" >> $LAUNCHER/cataclysm-launcher.sh
       echo "if [ -f ~/.Xresources ]" >> $LAUNCHER/cataclysm-launcher.sh
       echo "then" >> $LAUNCHER/cataclysm-launcher.sh
       echo "  echo 'Backing up current font.'" >> $LAUNCHER/cataclysm-launcher.sh
@@ -328,19 +336,19 @@ elif [[ ( "$VERSION" = 'T' ) || ( "$VERSION" = 't' ) ]]
     then
       if [[ ( "$HOME" = 'Y' ) || ( "$HOME" = 'y' ) ]]
       then
-        make -s -j$(nproc --all) CLANG=1 CCACHE=1 RELEASE=1 LUA=1 USE_HOME_DIR=1
+        make -s -j$(nproc --all) CLANG=1 CCACHE=1 RELEASE=1 TILES=1 SOUND=1 LUA=1 USE_HOME_DIR=1
     elif [[ ( "$HOME" = 'N' ) || ( "$HOME" = 'n' ) ]]
       then
-        make -s -j$(nproc --all) CLANG=1 CCACHE=1 RELEASE=1 LUA=1
+        make -s -j$(nproc --all) CLANG=1 CCACHE=1 RELEASE=1 TILES=1 SOUND =1 LUA=1
       fi
   elif [[ ( "$SILENT" = 'N' ) || ( "$SILENT" = 'n' ) ]]
     then
       if [[ ( "$HOME" = 'Y' ) || ( "$HOME" = 'y' ) ]]
       then
-        make -j$(nproc --all) CLANG=1 CCACHE=1 RELEASE=1 LUA=1 USE_HOME_DIR=1
+        make -j$(nproc --all) CLANG=1 CCACHE=1 RELEASE=1 TILES=1 SOUND=1 LUA=1 USE_HOME_DIR=1
     elif [[ ( "$HOME" = 'N' ) || ( "$HOME" = 'n' ) ]]
       then
-        make -j$(nproc --all) CLANG=1 CCACHE-1 RELEASE=1 LUA=1
+        make -j$(nproc --all) CLANG=1 CCACHE-1 RELEASE=1 TILES=1 SOUND=1 LUA=1
       fi
     fi
   fi
@@ -356,7 +364,7 @@ then
     echo ""
     if [ -z $LAUNCHER ]
     then
-      LAUNCHER=$(pwd)
+      LAUNCHER=$DIR
     fi
   fi
   if [ -z $VERSION ]
@@ -375,7 +383,7 @@ then
     echo ""
   fi
   echo "#!/bin/bash" > $LAUNCHER/cataclysm-updater.sh
-  echo "GAMEDIRECTORY=$(pwd)/Cataclysm-DDA" >> $LAUNCHER/cataclysm-updater.sh
+  echo "GAMEDIRECTORY=$DIR/Cataclysm-DDA" >> $LAUNCHER/cataclysm-updater.sh
   echo "cd \$GAMEDIRECTORY" >> $LAUNCHER/cataclysm-updater.sh
   echo "git pull" >> $LAUNCHER/cataclysm-updater.sh
   echo "make clean" >> $LAUNCHER/cataclysm-updater.sh
@@ -433,19 +441,19 @@ elif [[ ( "$VERSION" = 'T' ) || ( "$VERSION" = 't' ) ]]
     then
       if [[ ( "$HOME" = 'Y' ) || ( "$HOME" = 'y' ) ]]
       then
-        echo "make -s -j$(nproc --all) CLANG=1 CCACHE=1 RELEASE=1 LUA=1 USE_HOME_DIR=1" >> $LAUNCHER/cataclysm-updater.sh
+        echo "make -s -j$(nproc --all) CLANG=1 CCACHE=1 RELEASE=1 TILES=1 SOUND=1 LUA=1 USE_HOME_DIR=1" >> $LAUNCHER/cataclysm-updater.sh
     elif [[ ( "$HOME" = 'N' ) || ( "$HOME" = 'n' ) ]]
       then
-        echo "make -s -j$(nproc --all) CLANG=1 CCACHE=1 RELEASE=1 LUA=1" >> $LAUNCHER/cataclysm-updater.sh
+        echo "make -s -j$(nproc --all) CLANG=1 CCACHE=1 RELEASE=1 TILES=1 SOUND=1 LUA=1" >> $LAUNCHER/cataclysm-updater.sh
       fi
   elif [[ ( "$SILENT" = 'N' ) || ( "$SILENT" = 'n' ) ]]
     then
       if [[ ( "$HOME" = 'Y' ) || ( "$HOME" = 'y' ) ]]
       then
-        echo "make -j$(nproc --all) CLANG=1 CCACHE=1 RELEASE=1 LUA=1 USE_HOME_DIR=1" >> $LAUNCHER/cataclysm-updater.sh
+        echo "make -j$(nproc --all) CLANG=1 CCACHE=1 RELEASE=1 TILES=1 SOUND=1 LUA=1 USE_HOME_DIR=1" >> $LAUNCHER/cataclysm-updater.sh
     elif [[ ( "$HOME" = 'N' ) || ( "$HOME" = 'n' ) ]]
       then
-        echo "make -j$(nproc --all) CLANG=1 CCACHE-1 RELEASE=1 LUA=1" >> $LAUNCHER/cataclysm-updater.sh
+        echo "make -j$(nproc --all) CLANG=1 CCACHE-1 RELEASE=1 TILES=1 SOUND=1LUA=1" >> $LAUNCHER/cataclysm-updater.sh
       fi
     fi
   fi
