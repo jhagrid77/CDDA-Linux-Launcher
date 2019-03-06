@@ -33,7 +33,7 @@ then
       sudo apt-get update && sudo apt-get install astyle build-essential ccache clang git libglib2.0-dev liblua5.2-devel liblua5.3-dev libncurses5-dev libncursesw5-dev lua5.2 lua5.3 zip -y
   elif [ "$OS" = "Arch" ]
     then
-      sudo pacman -Syy && sudo pacman -S astyle ccache clang git glib2 lua ncurses zip
+      sudo pacman -Syy && sudo pacman -S --needed base-devel community/astyle ccache clang git glib2 lua ncurses zip
   elif [ "$OS" = "RPM-DNF" ]
     then
       if [ "$ARCH" = 'x86_64' ]
@@ -86,7 +86,7 @@ then
           sudo yum install terminus-fonts-console
       elif [ "$OS" = 'Arch' ]
         then
-          sudo pacman -S terminus-font
+          sudo pacman -S --needed terminus-font
         fi
         sudo echo 'KEYMAP="us"' | sudo tee $LAUNCHER/backups/game-font 1> /dev/null
         sudo echo 'FONT="ter-v32n"' | sudo tee -a $LAUNCHER/backups/game-font 1> /dev/null
@@ -126,18 +126,18 @@ elif [[ ( "$VERSION" = 'T' ) || ( "$VERSION" = 't' ) ]]
     echo "Installing needed dependencies."
     if [ "$OS" = 'Debian' ]
     then
-      sudo apt-get update && sudo apt-get install build-essential ccache clang git libfreetype6-dev liblua5.2-dev liblua5.3-dev libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev lua5.2 lua5.3 zip -y
+      sudo apt-get update && sudo apt-get install astyle build-essential ccache clang git libfreetype6-dev liblua5.2-dev liblua5.3-dev libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev lua5.2 lua5.3 zip -y
   elif [ "$OS" = 'Arch' ]
     then
-      sudo pacman -Syy && sudo pacman -S base-devel bzip2 ccache clang freetype2 gcc-libs git glibc lua sdl2 sdl2_image sdl2_mixer sdl2_ttf zip zlib
+      sudo pacman -Syy && sudo pacman -S --needed base-devel bzip2 ccache clang community/astyle freetype2 gcc-libs git glibc lua sdl2 sdl2_image sdl2_mixer sdl2_ttf zip zlib
   elif [ "$OS" = 'RPM-DNF' ]
     then
       if [ "$ARCH" = 'x86_64' ]
       then
-        sudo dnf install bzip2.$ARCH ccache.$ARCH clang.$ARCH freetype.$ARCH git.$ARCH glibc.$ARCH lua.$ARCH make.$ARCH SDL2-devel.$ARCH SDL2_image-devel.$ARCH SDL2_mixer-devel.$ARCH SDL2_ttf-devel.$ARCH zip.$ARCH
+        sudo dnf install astyle.$ARCH bzip2.$ARCH ccache.$ARCH clang.$ARCH freetype.$ARCH git.$ARCH glibc.$ARCH lua.$ARCH make.$ARCH SDL2-devel.$ARCH SDL2_image-devel.$ARCH SDL2_mixer-devel.$ARCH SDL2_ttf-devel.$ARCH zip.$ARCH
     elif [ "$ARCH" = 'i686' ]
       then
-        sudo dnf install clang.$ARCH freetype.$ARCH git.$ARCH glibc.$ARCH lua.$ARCH make.$ARCH SDL2-devel.$ARCH SDL2_image-devel.$ARCH SDL2_mixer-devel.$ARCH SDL2_ttf-devel.$ARCH zip.$ARCH
+        sudo dnf install astyle.$ARCH clang.$ARCH freetype.$ARCH git.$ARCH glibc.$ARCH lua.$ARCH make.$ARCH SDL2-devel.$ARCH SDL2_image-devel.$ARCH SDL2_mixer-devel.$ARCH SDL2_ttf-devel.$ARCH zip.$ARCH
       fi
       #elif [ "$OS" = 'RPM-ZYPPER' ]
       #then
@@ -145,10 +145,10 @@ elif [[ ( "$VERSION" = 'T' ) || ( "$VERSION" = 't' ) ]]
     then
       if [ "$ARCH" = 'x86_64' ]
       then
-        sudo yum install bzip2.$ARCH ccache.$ARCH clang.$ARCH freetype.$ARCH git.$ARCH glibc.$ARCH lua.$ARCH make.$ARCH SDL2-devel.$ARCH SDL2_image-devel.$ARCH SDL2_mixer-devel.$ARCH SDL2_ttf-devel.$ARCH zip.$ARCH
+        sudo yum install astyle.$ARCH bzip2.$ARCH ccache.$ARCH clang.$ARCH freetype.$ARCH git.$ARCH glibc.$ARCH lua.$ARCH make.$ARCH SDL2-devel.$ARCH SDL2_image-devel.$ARCH SDL2_mixer-devel.$ARCH SDL2_ttf-devel.$ARCH zip.$ARCH
     elif [ "$ARCH" = 'i686' ]
       then
-        sudo yum install clang.$ARCH freetype.$ARCH git.$ARCH glibc.$ARCH lua.$ARCH make.$ARCH SDL2-devel.$ARCH SDL2_image-devel.$ARCH SDL2_mixer-devel.$ARCH SDL2_ttf-devel.$ARCH zip.$ARCH
+        sudo yum install astyle.$ARCH clang.$ARCH freetype.$ARCH git.$ARCH glibc.$ARCH lua.$ARCH make.$ARCH SDL2-devel.$ARCH SDL2_image-devel.$ARCH SDL2_mixer-devel.$ARCH SDL2_ttf-devel.$ARCH zip.$ARCH
       fi
     fi
     if [ "$OS" = 'Debian' ]
@@ -179,7 +179,7 @@ elif [[ ( "$VERSION" = 'T' ) || ( "$VERSION" = 't' ) ]]
           sudo apt-get update && sudo apt-get install i3 lightdm xinit x11-server-utils -y
       elif [ "$OS" = 'Arch' ]
         then
-          sudo pacman -Syy && sudo pacman -S i3 lightdm xinit
+          sudo pacman -Syy && sudo pacman -S --needed i3 lightdm xinit
       elif [ "$OS" = 'RPM-DNF' ]
         then
           if [ "$ARCH" = 'x86_64' ]
@@ -267,18 +267,86 @@ elif [[ ( "$VERSION" = 'T' ) || ( "$VERSION" = 't' ) ]]
   git clone --depth=1 https://github.com/CleverRaven/Cataclysm-DDA.git
   cd Cataclysm-DDA
 
+
+  read -n 1 -p "Would you like the compiler to be silent/non-verbose? (This means no output during compiling) (Please enter Y or N): " SILENT
+  echo ""
+  read -n 1 -p "Would you like your data to be stored in your Home directory? (Please enter Y or N): " HOME
+  echo ""
   echo "Compiling Cataclysm: DDA."
   make clean
   if [[ ( "$VERSION" = 'N' ) || ( "$VERSION" = 'n' ) ]]
   then
-    make -s -j$(nproc --all) CLANG=1 CCACHE=1 RELEASE=1 LUA=1 USE_HOME_DIR=1
+    if [[ "$OS" =~ 'RPM' ]]
+    then
+      if [ "$ARCH" = 'i686' ]
+      then
+        if [[ ( "$SILENT" = 'Y' ) || ( "$SILENT" = 'y' ) ]]
+        then
+          if [[ ( "$HOME" = 'Y' ) || ( "$HOME" = 'y' ) ]]
+          then
+            make -s -j$(nproc --all) CLANG=1 RELEASE=1 LUA=1 USE_HOME_DIR=1
+        elif [[ ( "$HOME" = 'N' ) || ( "$HOME" = 'n' ) ]]
+          then
+            make -s -j$(nproc --all) CLANG=1 RELEASE=1 LUA=1
+          fi
+          if [[ ( "$SILENT" = 'N' ) || ( "$SILENT" = 'n' ) ]]
+          then
+            if [[ ( "$HOME" = 'Y' ) || ( "$HOME" = 'y' ) ]]
+            then
+              make -j$(nproc --all) CLANG=1 RELEASE=1 LUA=1 USE_HOME_DIR=1
+          elif [[ ( "$HOME" = 'N' ) || ( "$HOME" = 'n' ) ]]
+            then
+              make -j$(nproc --all) CLANG=1 RELEASE=1 LUA=1
+            fi
+          fi
+        fi
+      fi
+    else
+      if [[ ( "$SILENT" = 'Y' ) || ( "$SILENT" = 'y' ) ]]
+      then
+        if [[ ( "$HOME" = 'Y' ) || ( "$HOME" = 'y' ) ]]
+        then
+          make -s -j$(nproc --all) CLANG=1 CCACHE=1 RELEASE=1 LUA=1 USE_HOME_DIR=1
+      elif [[ ( "$HOME" = 'N' ) || ( "$HOME" = 'n' ) ]]
+        then
+          make -s -j$(nproc --all) CLANG=1 CCACHE=1 RELEASE=1 LUA=1
+        fi
+    elif [[ ( "$SILENT" = 'N' ) || ( "$SILENT" = 'n' ) ]]
+      then
+        if [[ ( "$HOME" = 'Y' ) || ( "$HOME" = 'y' ) ]]
+        then
+          make -j$(nproc --all) CLANG=1 CCACHE=1 RELEASE=1 LUA=1 USE_HOME_DIR=1
+      elif [[ ( "$HOME" = 'N' ) || ( "$HOME" = 'n' ) ]]
+        then
+          make -j$(nproc --all) CLANG=1 CCACHE-1 RELEASE=1 LUA=1
+        fi
+      fi
+    fi
 elif [[ ( "$VERSION" = 'T' ) || ( "$VERSION" = 't' ) ]]
   then
-    make -s -j$(nproc --all) CLANG=1 CCACHE=1 RELEASE=1 LUA=1 TILES=1 USE_HOME_DIR=1
+    if [[ ( "$SILENT" = 'Y' ) || ( "$SILENT" = 'y' ) ]]
+    then
+      if [[ ( "$HOME" = 'Y' ) || ( "$HOME" = 'y' ) ]]
+      then
+        make -s -j$(nproc --all) CLANG=1 CCACHE=1 RELEASE=1 LUA=1 USE_HOME_DIR=1
+    elif [[ ( "$HOME" = 'N' ) || ( "$HOME" = 'n' ) ]]
+      then
+        make -s -j$(nproc --all) CLANG=1 CCACHE=1 RELEASE=1 LUA=1
+      fi
+  elif [[ ( "$SILENT" = 'N' ) || ( "$SILENT" = 'n' ) ]]
+    then
+      if [[ ( "$HOME" = 'Y' ) || ( "$HOME" = 'y' ) ]]
+      then
+        make -j$(nproc --all) CLANG=1 CCACHE=1 RELEASE=1 LUA=1 USE_HOME_DIR=1
+    elif [[ ( "$HOME" = 'N' ) || ( "$HOME" = 'n' ) ]]
+      then
+        make -j$(nproc --all) CLANG=1 CCACHE-1 RELEASE=1 LUA=1
+      fi
+    fi
   fi
 fi
 
-read -n 1 -p "Would you like to create an update script for Cataclysm: Dark Days Ahead?: " UPDATE
+read -n 1 -p "Would you like to create an update script for Cataclysm: Dark Days Ahead? (Please enter Y or N): " UPDATE
 echo ""
 if [[ ( "$UPDATE" = 'Y' ) || ( "$UPDATE" = 'y' )]]
 then
@@ -296,6 +364,16 @@ then
     read -n 1 -p "Would you like to install the updater for the [N]curses or [T]iles version? (Please enter N or T): " VERSION
     echo ""
   fi
+  if [ -z $SILENT ]
+  then
+    read -n 1 -p "Would you like the compiler to be silent/non-verbose? (This means no output during compiling) (Please enter Y or N): " SILENT
+    echo ""
+  fi
+  if [ -z $HOME ]
+  then
+    read -n 1 -p "Would you like your data to be stored in your Home directory? (Please enter Y or N): " HOME
+    echo ""
+  fi
   echo "#!/bin/bash" > $LAUNCHER/cataclysm-updater.sh
   echo "GAMEDIRECTORY=$(pwd)/Cataclysm-DDA" >> $LAUNCHER/cataclysm-updater.sh
   echo "cd \$GAMEDIRECTORY" >> $LAUNCHER/cataclysm-updater.sh
@@ -307,23 +385,81 @@ then
     then
       if [ "$ARCH" = 'i686' ]
       then
-        echo "make -s -j$(nproc --all) CLANG=1 RELEASE=1 LUA=1 USE_HOME_DIR=1" >> $LAUNCHER/cataclysm-updater.sh
+        if [[ ( "$SILENT" = 'Y' ) || ( "$SILENT" = 'y' ) ]]
+        then
+          if [[ ( "$HOME" = 'Y' ) || ( "$HOME" = 'y' ) ]]
+          then
+            echo "make -s -j$(nproc --all) CLANG=1 RELEASE=1 LUA=1 USE_HOME_DIR=1" >> $LAUNCHER/cataclysm-updater.sh
+        elif [[ ( "$HOME" = 'N' ) || ( "$HOME" = 'n' ) ]]
+          then
+            echo "make -s -j$(nproc --all) CLANG=1 RELEASE=1 LUA=1" >> $LAUNCHER/cataclysm-updater.sh
+          fi
+          if [[ ( "$SILENT" = 'N' ) || ( "$SILENT" = 'n' ) ]]
+          then
+            if [[ ( "$HOME" = 'Y' ) || ( "$HOME" = 'y' ) ]]
+            then
+              echo "make -j$(nproc --all) CLANG=1 RELEASE=1 LUA=1 USE_HOME_DIR=1" >> $LAUNCHER/cataclysm-updater.sh
+          elif [[ ( "$HOME" = 'N' ) || ( "$HOME" = 'n' ) ]]
+            then
+              echo "make -j$(nproc --all) CLANG=1 RELEASE=1 LUA=1" >> $LAUNCHER/cataclysm-updater.sh
+            fi
+          fi
+        fi
       fi
     else
-      echo "make -s -j$(nproc --all) CLANG=1 CCACHE=1 RELEASE=1 LUA=1 USE_HOME_DIR=1" >> $LAUNCHER/cataclysm-updater.sh
+      if [[ ( "$SILENT" = 'Y' ) || ( "$SILENT" = 'y' ) ]]
+      then
+        if [[ ( "$HOME" = 'Y' ) || ( "$HOME" = 'y' ) ]]
+        then
+          echo "make -s -j$(nproc --all) CLANG=1 CCACHE=1 RELEASE=1 LUA=1 USE_HOME_DIR=1" >> $LAUNCHER/cataclysm-updater.sh
+      elif [[ ( "$HOME" = 'N' ) || ( "$HOME" = 'n' ) ]]
+        then
+          echo "make -s -j$(nproc --all) CLANG=1 CCACHE=1 RELEASE=1 LUA=1" >> $LAUNCHER/cataclysm-updater.sh
+        fi
+    elif [[ ( "$SILENT" = 'N' ) || ( "$SILENT" = 'n' ) ]]
+      then
+        if [[ ( "$HOME" = 'Y' ) || ( "$HOME" = 'y' ) ]]
+        then
+          echo "make -j$(nproc --all) CLANG=1 CCACHE=1 RELEASE=1 LUA=1 USE_HOME_DIR=1"
+      elif [[ ( "$HOME" = 'N' ) || ( "$HOME" = 'n' ) ]]
+        then
+          echo "make -j$(nproc --all) CLANG=1 CCACHE-1 RELEASE=1 LUA=1" >> $LAUNCHER/cataclysm-updater.sh
+        fi
+      fi
     fi
-  elif [[ ( "$VERSION" = 'T' ) || ( "$VERSION" = 't' ) ]]
+elif [[ ( "$VERSION" = 'T' ) || ( "$VERSION" = 't' ) ]]
   then
-    echo "make -s -j$(nproc --all) CLANG=1 CCACHE=1 RELEASE=1 LUA=1 TILES=1 USE_HOME_DIR=1" >> $LAUNCHER/cataclysm-updater.sh
+    if [[ ( "$SILENT" = 'Y' ) || ( "$SILENT" = 'y' ) ]]
+    then
+      if [[ ( "$HOME" = 'Y' ) || ( "$HOME" = 'y' ) ]]
+      then
+        echo "make -s -j$(nproc --all) CLANG=1 CCACHE=1 RELEASE=1 LUA=1 USE_HOME_DIR=1" >> $LAUNCHER/cataclysm-updater.sh
+    elif [[ ( "$HOME" = 'N' ) || ( "$HOME" = 'n' ) ]]
+      then
+        echo "make -s -j$(nproc --all) CLANG=1 CCACHE=1 RELEASE=1 LUA=1" >> $LAUNCHER/cataclysm-updater.sh
+      fi
+  elif [[ ( "$SILENT" = 'N' ) || ( "$SILENT" = 'n' ) ]]
+    then
+      if [[ ( "$HOME" = 'Y' ) || ( "$HOME" = 'y' ) ]]
+      then
+        echo "make -j$(nproc --all) CLANG=1 CCACHE=1 RELEASE=1 LUA=1 USE_HOME_DIR=1" >> $LAUNCHER/cataclysm-updater.sh
+    elif [[ ( "$HOME" = 'N' ) || ( "$HOME" = 'n' ) ]]
+      then
+        echo "make -j$(nproc --all) CLANG=1 CCACHE-1 RELEASE=1 LUA=1" >> $LAUNCHER/cataclysm-updater.sh
+      fi
+    fi
   fi
   chmod +x $LAUNCHER/cataclysm-updater.sh
 fi
 
-unset INSTALL
-unset VERSION
+unset ARCH
 unset FONT
-unset LAUNCHER
-unset UPDATE
-unset GUI
-unset OS
 unset GRAPHICS
+unset GUI
+unset HOME
+unset INSTALL
+unset LAUNCHER
+unset OS
+unset SILENT
+unset UPDATE
+unset VERSION
