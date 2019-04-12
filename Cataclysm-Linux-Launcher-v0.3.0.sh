@@ -2,11 +2,6 @@
 
 VERSION=0.3.0
 
-RED="\033[0;31m"
-BLUE="\033[0;34m"
-GREEN="\033[1;32m"
-ENDCOLOR="\033[0m"
-
 if type apt-get >/dev/null 2>&1
 then
   OS=Debian
@@ -26,6 +21,14 @@ fi
 
 ARCH=$(uname -m)
 
+if [ -f config.sh ]
+then
+  source ./config.sh
+else
+  touch ./config.sh
+  chmod +x ./config.sh
+fi
+
 function run_cataclysm() {
   ./cataclysmdda/catalysm-launcher 2> ./cataclysmdda/cataclysm.log
 }
@@ -40,9 +43,9 @@ function update_launcher() {
 
   if [[ "$VERSION_COMPARABLE" -ge "$LATEST_COMPARABLE" ]]
   then
-    echo -e  $GREEN"Latest Version Verified"$ENDCOLOR
+    echo "Latest Version Verified"
   else
-    echo -e  $RED"Cataclysm-Linux-Launcher Version $VERSION_MAJOR.$VERSION_MINOR.$VERSION_PATCH is obsolete.  Latest version available is $LATEST"$ENDCOLOR
+    echo "Cataclysm-Linux-Launcher Version $VERSION_MAJOR.$VERSION_MINOR.$VERSION_PATCH is obsolete.  Latest version available is $LATEST"
     read -n 1 -p "Would you like to update the Linux launcher to the latest version? (Please enter Y or N): " UPDATE
     echo ""
     if [[ ( "$UPDATE" = 'Y' ) || ( "$UPDATE" = 'y' ) ]]
@@ -57,7 +60,50 @@ function update_launcher() {
 }
 
 function install_cataclysm_compile() {
-  true
+  if [ "$ARCH" = 'x86_64' ]
+  then
+    if [ "$VER" = 'Ncurses' ]
+    then
+      echo "Installing needed dependencies"
+      if [ "$OS" = 'Debian' ]
+      then
+        sudo apt-get update && sudo apt-get install -y astyle libglib2.0-0 lua5.2 ncurses-base
+    elif [ "$OS" = 'Arch' ]
+      then
+        sudo pacman -Syy && sudo pacman -S --needed astyle glib2 lua ncurses
+        sudo ln -s /usr/lib/liblua5.3.so /usr/lib/liblua5.3.so.0
+        sudo ln -s /usr/lib/libncursesw.so.6.1 /usr/lib/libncursesw.so.5
+        sudo ln -s /usr/lib/libtinfo.so.6 /usr/lib/libtinfo.so.5
+    elif [ "$OS" = 'RPM-DNF' ]
+      then
+        sudo dnf install astyle.$ARCH glib2.$ARCH lua.$ARCH ncurses.$ARCH
+        #elif [ "$OS" = 'RPM-YAST']
+        #then
+    elif [ "$OS" = 'RPM-YUM' ]
+      then
+        sudo yum install astyle.$ARCH glib2.$ARCH lua.$ARCH ncurses.$ARCH
+      fi
+  elif [ "$VER" = 'Tiles' ]
+    then
+      echo "Installing needed dependencies"
+      if [ "$OS" = 'Debian' ]
+      then
+        sudo apt-get update && sudo apt-get install -y astyle libglib2.0-0 lua5.2 ncurses-base
+    elif [ "$OS" = 'Arch' ]
+      then
+        sudo pacman -Syy && sudo pacman -S --needed sdl2_mixer sdl_ttf sdl2_image sdl2 lua
+    elif [ "$OS" = 'RPM-DNF' ]
+      then
+        sudo dnf install astyle.$ARCH glib2.$ARCH lua.$ARCH ncurses.$ARCH
+        #elif [ "$OS" = 'RPM-YAST']
+        #then
+    elif [ "$OS" = 'RPM-YUM' ]
+      then
+        sudo yum install astyle.$ARCH glib2.$ARCH lua.$ARCH ncurses.$ARCH
+      fi
+    fi
+    sleep 5
+  fi
 }
 
 function install_cataclysm_binary() {
@@ -70,7 +116,7 @@ function install_cataclysm_binary() {
     do
       PS3="What version would you like to install?: "
       clear
-      echo "Install Build Menu"
+      echo "Install Menu"
       select INSTALL in $INSTALLABLE "Go Back"
       do
         case "$INSTALL" in
@@ -96,7 +142,7 @@ function install_cataclysm_binary() {
               then
                 sudo yum install astyle.$ARCH glib2.$ARCH lua.$ARCH ncurses.$ARCH
               fi
-            elif [ "$VER" = 'Tiles' ]
+          elif [ "$VER" = 'Tiles' ]
             then
               echo "Installing needed dependencies"
               if [ "$OS" = 'Debian' ]
@@ -104,10 +150,7 @@ function install_cataclysm_binary() {
                 sudo apt-get update && sudo apt-get install -y astyle libglib2.0-0 lua5.2 ncurses-base
             elif [ "$OS" = 'Arch' ]
               then
-                sudo pacman -Syy && sudo pacman -S --needed astyle glib2 lua ncurses
-                sudo ln -s /usr/lib/liblua5.3.so /usr/lib/liblua5.3.so.0
-                sudo ln -s /usr/lib/libncursesw.so.6.1 /usr/lib/libncursesw.so.5
-                sudo ln -s /usr/lib/libtinfo.so.6 /usr/lib/libtinfo.so.5
+                sudo pacman -Syy && sudo pacman -S --needed sdl2_mixer sdl_ttf sdl2_image sdl2 lua
             elif [ "$OS" = 'RPM-DNF' ]
               then
                 sudo dnf install astyle.$ARCH glib2.$ARCH lua.$ARCH ncurses.$ARCH
@@ -119,11 +162,15 @@ function install_cataclysm_binary() {
               fi
             fi
             wget -nc -q http://dev.narc.ro/cataclysm/jenkins-latest/Linux_x64/$1/$INSTALL
-            MOVE=$(tar -tf $INSTALL)
+            MOVE=$(tar -tf $INSTALL | head -n 1)
             tar -xvzf $INSTALL
             rm $INSTALL
             mv $MOVE cataclysmdda/
-            clear
+            sleep 5
+            unset $INSTALLABLE
+            unset $INSTALL
+            unset $MOVE
+            source ./config.sh
             break
             ;;
           "Go Back" )
@@ -140,7 +187,16 @@ function update_cataclysm_compile() {
 }
 
 function update_cataclysm_binary() {
-  true
+  cd ./cataclysmdda
+  mkdir previous_version
+  mv ./* ./previous_version 2>/dev/null
+  cd ..
+  install_cataclysm_binary $VER
+  cd ./cataclysmdda
+  for i in "${ROLLBACK[@]}"
+  do
+    cp -r ./previous_version/$i ./
+  done
 }
 
 if [ $# = 0 ]
@@ -172,12 +228,48 @@ then
                     do
                       case "$VER" in
                         "Ncurses")
+                          if [ "$(cat ./config.sh | grep VER)" != "^VER=" ]
+                          then
+                            echo "VER=$VER" > ./config.sh
+                            source ./config.sh
+                          elif [ "$(cat ./config.sh | grep VER)" = "^VER=" ]
+                          then
+                            sed -i "s|^VER=.*|VER=$VER|g" ./config.sh
+                            source ./config.sh
+                          fi
                           install_cataclysm_binary Curses
+                          if [ "$(cat ./config.sh | grep INSTALL)" != "^INSTALL=" ]
+                          then
+                            echo "INSTALL=Binary" > ./config.sh
+                            source ./config.sh
+                          elif [ "$(cat ./config.sh | grep INSTALL)" = "^INSTALL=" ]
+                          then
+                            sed -i "s|^INSTALL=.*|INSTALL=Binary|g" ./config.sh
+                            source ./config.sh
+                          fi
                           clear
                           break
                           ;;
                         "Tiles")
+                          if [ "$(cat ./config.sh | grep VER)" != "^VER=" ]
+                          then
+                            echo "VER=$VER" > ./config.sh
+                            source ./config.sh
+                          elif [ "$(cat ./config.sh | grep VER)" = "^VER=" ]
+                          then
+                            sed -i "s|^VER=.*|VER=$VER|g" ./config.sh
+                            source ./config.sh
+                          fi
                           install_cataclysm_binary Tiles
+                          if [ "$(cat ./config.sh | grep INSTALL)" != "^INSTALL=" ]
+                          then
+                            echo "INSTALL=Binary" > ./config.sh
+                            source ./config.sh
+                          elif [ "$(cat ./config.sh | grep INSTALL)" = "^INSTALL=" ]
+                          then
+                            sed -i "s|^INSTALL=.*|INSTALL=Binary|g" ./config.sh
+                            source ./config.sh
+                          fi
                           clear
                           break
                           ;;
@@ -198,11 +290,47 @@ then
                     do
                       case "$VER" in
                         "Ncurses")
+                          if [ "$(cat ./config.sh | grep VER)" != "^VER=" ]
+                          then
+                            echo "VER=$VER" > ./config.sh
+                            source ./config.sh
+                          elif [ "$(cat ./config.sh | grep VER)" = "^VER=" ]
+                          then
+                            sed -i "s|^VER=.*|VER=$VER|g" ./config.sh
+                            source ./config.sh
+                          fi
                           install_cataclysm_compile Ncurses
+                          if [ "$(cat ./config.sh | grep INSTALL)" != "^INSTALL=" ]
+                          then
+                            echo "INSTALL=Compile" > ./config.sh
+                            source ./config.sh
+                          elif [ "$(cat ./config.sh | grep INSTALL)" = "^INSTALL=" ]
+                          then
+                            sed -i "s|^INSTALL=.*|INSTALL=Compile|g" ./config.sh
+                            source ./config.sh
+                          fi
                           break
                           ;;
                         "Tiles")
+                          if [ "$(cat ./config.sh | grep VER)" != "^VER=" ]
+                          then
+                            echo "VER=$VER" > ./config.sh
+                            source ./config.sh
+                          elif [ "$(cat ./config.sh | grep VER)" = "^VER=" ]
+                          then
+                            sed -i "s|^VER=.*|VER=$VER|g" ./config.sh
+                            source ./config.sh
+                          fi
                           install_cataclysm_compile Tiles
+                          if [ "$(cat ./config.sh | grep INSTALL)" != "^INSTALL=" ]
+                          then
+                            echo "INSTALL=Compile" > ./config.sh
+                            source ./config.sh
+                          elif [ "$(cat ./config.sh | grep INSTALL)" = "^INSTALL=" ]
+                          then
+                            sed -i "s|^INSTALL=.*|INSTALL=Compile|g" ./config.sh
+                            source ./config.sh
+                          fi
                           break
                           ;;
                         "Go Back")
@@ -211,6 +339,16 @@ then
                       esac
                     done
                   done
+                  ;;
+                "Update Cataclysm")
+                  if [ "$INSTALL" = 'Binary' ]
+                  then
+                    update_cataclysm_binary
+                  elif [ "$INSTALL" = 'Compile' ]
+                  then
+                    update_cataclysm_compile
+                  fi
+                  break
                   ;;
                 "Launch Cataclysm")
                   run_cataclysm
@@ -222,6 +360,14 @@ then
               esac
             done
           done
+          ;;
+        "Backup")
+          ;;
+        "Mods")
+          ;;
+        "Tilesets")
+          ;;
+        "Soundpacks")
           ;;
         "Update Launcher")
           update_launcher
@@ -239,9 +385,6 @@ then
 fi
 
 unset ARCH
-unset BLUE
-unset ENDCOLOR
-unset GREEN
 unset INSTALL
 unset INSTALLABLE
 unset LATEST
@@ -250,7 +393,8 @@ unset MOVE
 unset OS
 unset PS3
 unset QUESTION
-unset RED
+unset ROLLBACK
 unset UPDATE
 unset VER
+unset VERSION
 unset VERSION_COMPARABLE
