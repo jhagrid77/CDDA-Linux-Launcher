@@ -164,7 +164,7 @@ elif [[ ( "$VERSION" = 'T' ) || ( "$VERSION" = 't' ) ]]
       GRAPHICS=$(dpkg -l 2>/dev/null | grep -E "xinit|wayland" | awk '{print $2}')
   elif [ "$OS" = 'Arch' ]
     then
-      GRAPHICS=$(pacman -Q | awk '{print $1}' | grep -E "xinit\|wayland")
+      GRAPHICS=$(pacman -Q | awk '{print $1}' | grep -E "xinit|wayland")
   elif [ "$OS" = 'RPM-DNF' ]
     then
       GRAPHICS=$(dnf list installed | grep -E "xinit|wayland" | awk '{print $1}')
