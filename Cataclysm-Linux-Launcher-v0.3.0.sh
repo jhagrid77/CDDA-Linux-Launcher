@@ -20,6 +20,7 @@ then
 fi
 
 ARCH=$(uname -m)
+THREADS=$(($(nproc)/2))
 
 if [ -f config.sh ]
 then
@@ -30,7 +31,13 @@ else
 fi
 
 function run_cataclysm() {
-  ./cataclysmdda/catalysm-launcher 2> ./cataclysmdda/cataclysm.log
+  if [ "$INSTALL" = 'Binary' ]
+  then
+    ./cataclysmdda/cataclysm-launcher 2> ./cataclysmdda/cataclysm.log
+elif [ "$INSTALL" = 'Compile' ]
+  then
+    ./Cataclysm-DDA/cataclysm-launcher 2> ./Cataclysm-DDA/cataclysm.log
+  fi
 }
 
 function update_launcher() {
@@ -67,10 +74,10 @@ function install_cataclysm_compile() {
       echo "Installing needed dependencies"
       if [ "$OS" = 'Debian' ]
       then
-        sudo apt-get update && sudo apt-get install -y astyle libglib2.0-0 lua5.2 ncurses-base
+        sudo apt-get update && sudo apt-get install -y build-essential astyle clang ccache git zlib libglib2.0-0 lua5.2 ncurses-base
     elif [ "$OS" = 'Arch' ]
       then
-        sudo pacman -Syy && sudo pacman -S --needed astyle glib2 lua ncurses
+        sudo pacman -Syy && sudo pacman -S --needed base-devel astyle glib2 lua ncurses
         sudo ln -s /usr/lib/liblua5.3.so /usr/lib/liblua5.3.so.0
         sudo ln -s /usr/lib/libncursesw.so.6.1 /usr/lib/libncursesw.so.5
         sudo ln -s /usr/lib/libtinfo.so.6 /usr/lib/libtinfo.so.5
@@ -83,6 +90,10 @@ function install_cataclysm_compile() {
       then
         sudo yum install astyle.$ARCH glib2.$ARCH lua.$ARCH ncurses.$ARCH
       fi
+      git clone https://github.com/CleverRaven/Cataclysm-DDA.git
+      cd ./Cataclysm-DDA
+      make clean
+      make -j $THREADS CLANG=1 CCACHE=1 LTO=1 LOCALIZE=0 RELEASE=1 LUA=1 USE_HOME_DIR=1
   elif [ "$VER" = 'Tiles' ]
     then
       echo "Installing needed dependencies"
@@ -101,6 +112,10 @@ function install_cataclysm_compile() {
       then
         sudo yum install astyle.$ARCH glib2.$ARCH lua.$ARCH ncurses.$ARCH
       fi
+      git clone https://github.com/CleverRaven/Cataclysm-DDA.git
+      cd ./Cataclysm-DDA
+      make clean
+      make -j $THREADS CLANG=1 CCACHE=1 LTO=1 LOCALIZE=0 RELEASE=1 TILES=1 SOUND=1 LUA=1 USE_HOME_DIR=1
     fi
     sleep 5
   fi
@@ -183,7 +198,19 @@ function install_cataclysm_binary() {
 }
 
 function update_cataclysm_compile() {
-  true
+  if [ "$VER" = 'Ncurses' ]
+  then
+    cd ./Cataclysm-DDA
+    git pull
+    make clean
+    make -j $THREADS CLANG=1 CCACHE=1 LTO=1 LOCALIZE=0 RELEASE=1 LUA=1 USE_HOME_DIR=1
+elif [ "$VER" = 'Tiles' ]
+  then
+    git clone https://github.com/CleverRaven/Cataclysm-DDA.git
+    cd ./Cataclysm
+    make clean
+    make -j $THREADS CLANG=1 CCACHE=1 LTO=1 LOCALIZE=0 RELEASE=1 LUA=1 USE_HOME_DIR=1
+  fi
 }
 
 function update_cataclysm_binary() {
@@ -228,21 +255,23 @@ then
                     do
                       case "$VER" in
                         "Ncurses")
-                          if [ "$(cat ./config.sh | grep VER)" != "^VER=" ]
+                          if ! grep -q "^VER=" ./config.sh
                           then
-                            echo "VER=$VER" > ./config.sh
+                            echo "VER=$VER" | tee -a ./config.sh
                             source ./config.sh
-                          elif [ "$(cat ./config.sh | grep VER)" = "^VER=" ]
+                          fi
+                          if [[ $(cat ./config.sh | grep "^VER=$VER") != VER=* ]]
                           then
                             sed -i "s|^VER=.*|VER=$VER|g" ./config.sh
                             source ./config.sh
                           fi
                           install_cataclysm_binary Curses
-                          if [ "$(cat ./config.sh | grep INSTALL)" != "^INSTALL=" ]
+                          if ! grep -q "^INSTALL=" ./config.sh
                           then
-                            echo "INSTALL=Binary" > ./config.sh
+                            echo "INSTALL=Binary" | tee -a ./config.sh
                             source ./config.sh
-                          elif [ "$(cat ./config.sh | grep INSTALL)" = "^INSTALL=" ]
+                          fi
+                          if [[ $(cat ./config.sh | grep "^INSTALL=Binary") != INSTALL=* ]]
                           then
                             sed -i "s|^INSTALL=.*|INSTALL=Binary|g" ./config.sh
                             source ./config.sh
@@ -251,21 +280,23 @@ then
                           break
                           ;;
                         "Tiles")
-                          if [ "$(cat ./config.sh | grep VER)" != "^VER=" ]
+                          if ! grep -q "^VER=" ./config.sh
                           then
-                            echo "VER=$VER" > ./config.sh
+                            echo "VER=$VER" | tee -a ./config.sh
                             source ./config.sh
-                          elif [ "$(cat ./config.sh | grep VER)" = "^VER=" ]
+                          fi
+                          if [[ $(cat ./config.sh | grep "^VER=$VER") != VER=* ]]
                           then
                             sed -i "s|^VER=.*|VER=$VER|g" ./config.sh
                             source ./config.sh
                           fi
                           install_cataclysm_binary Tiles
-                          if [ "$(cat ./config.sh | grep INSTALL)" != "^INSTALL=" ]
+                          if ! grep -q "^INSTALL=" ./config.sh
                           then
-                            echo "INSTALL=Binary" > ./config.sh
+                            echo "INSTALL=Binary" | tee -a ./config.sh
                             source ./config.sh
-                          elif [ "$(cat ./config.sh | grep INSTALL)" = "^INSTALL=" ]
+                          fi
+                          if [[ $(cat ./config.sh | grep "^INSTALL=Binary") != INSTALL=* ]]
                           then
                             sed -i "s|^INSTALL=.*|INSTALL=Binary|g" ./config.sh
                             source ./config.sh
@@ -290,21 +321,23 @@ then
                     do
                       case "$VER" in
                         "Ncurses")
-                          if [ "$(cat ./config.sh | grep VER)" != "^VER=" ]
+                          if ! grep -q "^VER=" ./config.sh
                           then
-                            echo "VER=$VER" > ./config.sh
+                            echo "VER=$VER" | tee -a ./config.sh
                             source ./config.sh
-                          elif [ "$(cat ./config.sh | grep VER)" = "^VER=" ]
+                          fi
+                          if [[ $(cat ./config.sh | grep "^VER=$VER") != VER=* ]]
                           then
                             sed -i "s|^VER=.*|VER=$VER|g" ./config.sh
                             source ./config.sh
                           fi
                           install_cataclysm_compile Ncurses
-                          if [ "$(cat ./config.sh | grep INSTALL)" != "^INSTALL=" ]
+                          if ! grep -q "^INSTALL=" ./config.sh
                           then
-                            echo "INSTALL=Compile" > ./config.sh
+                            echo "INSTALL=Compile" | tee -a ./config.sh
                             source ./config.sh
-                          elif [ "$(cat ./config.sh | grep INSTALL)" = "^INSTALL=" ]
+                          fi
+                          if [[ $(cat ./config.sh | grep "^INSTALL=Compile") != INSTALL=* ]]
                           then
                             sed -i "s|^INSTALL=.*|INSTALL=Compile|g" ./config.sh
                             source ./config.sh
@@ -312,21 +345,23 @@ then
                           break
                           ;;
                         "Tiles")
-                          if [ "$(cat ./config.sh | grep VER)" != "^VER=" ]
+                          if ! grep -q "^VER=" ./config.sh
                           then
-                            echo "VER=$VER" > ./config.sh
+                            echo "VER=$VER" | tee -a ./config.sh
                             source ./config.sh
-                          elif [ "$(cat ./config.sh | grep VER)" = "^VER=" ]
+                          fi
+                          if [[ $(cat ./config.sh | grep "^VER=$VER") != VER=* ]]
                           then
                             sed -i "s|^VER=.*|VER=$VER|g" ./config.sh
                             source ./config.sh
                           fi
                           install_cataclysm_compile Tiles
-                          if [ "$(cat ./config.sh | grep INSTALL)" != "^INSTALL=" ]
+                          if ! grep -q "^INSTALL=" ./config.sh
                           then
-                            echo "INSTALL=Compile" > ./config.sh
+                            echo "INSTALL=Compile" | tee -a ./config.sh
                             source ./config.sh
-                          elif [ "$(cat ./config.sh | grep INSTALL)" = "^INSTALL=" ]
+                          fi
+                          if [[ $(cat ./config.sh | grep "^INSTALL=Compile") != INSTALL=* ]]
                           then
                             sed -i "s|^INSTALL=.*|INSTALL=Compile|g" ./config.sh
                             source ./config.sh
@@ -341,6 +376,7 @@ then
                   done
                   ;;
                 "Update Cataclysm")
+                  source ./config.sh
                   if [ "$INSTALL" = 'Binary' ]
                   then
                     update_cataclysm_binary
@@ -351,6 +387,7 @@ then
                   break
                   ;;
                 "Launch Cataclysm")
+                  source ./config.sh
                   run_cataclysm
                   break
                   ;;
@@ -381,6 +418,42 @@ then
     done
   done
   #elif [[ $# -gt 0 ]]
+  #   POSITIONAL=()
+  #   while [[ $# -gt 0 ]]
+  #   do
+  #   key="$1"
+  #
+  #   case $key in
+  #     -h|--help)
+  #     echo "Possible arguments are:"
+  #     shift # past argument
+  #     shift # past value
+  #     ;;
+  #     -i|--install)
+  #     INSTALL=$2
+  #     shift # past argument
+  #     shift # past value
+  #     ;;
+  #     -v|--version)
+  #     VER="$2"
+  #     shift # past argument
+  #     shift # past value
+  #     ;;
+  #     -ul|--upgrade-launcher)
+  #     shift # past argument
+  #     shift # past value
+  #     ;;
+  #     -ug|--upgrade-game)
+  #     shift # past argument
+  #     shift # past value
+  #     ;;
+  #     *)    # unknown option
+  #     POSITIONAL+=("$1") # save it in an array for later
+  #     shift # past argument
+  #     ;;
+  # esac
+  # done
+  # set -- "${POSITIONAL[@]}" # restore positional parameters
   #then
 fi
 
