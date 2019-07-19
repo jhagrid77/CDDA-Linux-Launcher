@@ -326,7 +326,7 @@ elif [[ ( "$VERSION" = 'T' ) || ( "$VERSION" = 't' ) ]]
           make -j$(nproc --all) CLANG=1 CCACHE=1 RELEASE=1 LUA=1 USE_HOME_DIR=1
       elif [[ ( "$HOME" = 'N' ) || ( "$HOME" = 'n' ) ]]
         then
-          make -j$(nproc --all) CLANG=1 CCACHE-1 RELEASE=1 LUA=1
+          make -j$(nproc --all) CLANG=1 CCACHE=1 RELEASE=1 LUA=1
         fi
       fi
     fi
@@ -348,7 +348,7 @@ elif [[ ( "$VERSION" = 'T' ) || ( "$VERSION" = 't' ) ]]
         make -j$(nproc --all) CLANG=1 CCACHE=1 RELEASE=1 TILES=1 SOUND=1 LUA=1 USE_HOME_DIR=1
     elif [[ ( "$HOME" = 'N' ) || ( "$HOME" = 'n' ) ]]
       then
-        make -j$(nproc --all) CLANG=1 CCACHE-1 RELEASE=1 TILES=1 SOUND=1 LUA=1
+        make -j$(nproc --all) CLANG=1 CCACHE=1 RELEASE=1 TILES=1 SOUND=1 LUA=1
       fi
     fi
   fi
@@ -431,7 +431,7 @@ then
           echo "make -j$(nproc --all) CLANG=1 CCACHE=1 RELEASE=1 LUA=1 USE_HOME_DIR=1"
       elif [[ ( "$HOME" = 'N' ) || ( "$HOME" = 'n' ) ]]
         then
-          echo "make -j$(nproc --all) CLANG=1 CCACHE-1 RELEASE=1 LUA=1" >> $LAUNCHER/cataclysm-updater.sh
+          echo "make -j$(nproc --all) CLANG=1 CCACHE=1 RELEASE=1 LUA=1" >> $LAUNCHER/cataclysm-updater.sh
         fi
       fi
     fi
@@ -453,7 +453,7 @@ elif [[ ( "$VERSION" = 'T' ) || ( "$VERSION" = 't' ) ]]
         echo "make -j$(nproc --all) CLANG=1 CCACHE=1 RELEASE=1 TILES=1 SOUND=1 LUA=1 USE_HOME_DIR=1" >> $LAUNCHER/cataclysm-updater.sh
     elif [[ ( "$HOME" = 'N' ) || ( "$HOME" = 'n' ) ]]
       then
-        echo "make -j$(nproc --all) CLANG=1 CCACHE-1 RELEASE=1 TILES=1 SOUND=1LUA=1" >> $LAUNCHER/cataclysm-updater.sh
+        echo "make -j$(nproc --all) CLANG=1 CCACHE=1 RELEASE=1 TILES=1 SOUND=1LUA=1" >> $LAUNCHER/cataclysm-updater.sh
       fi
     fi
   fi
