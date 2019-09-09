@@ -79,7 +79,7 @@ function install_cataclysm_compile() {
         sudo apt-get update && sudo apt-get install -y build-essential astyle clang ccache git zlib libglib2.0-0 ncurses-base
     elif [ "$os" = 'Arch' ]
       then
-        sudo pacman -Syy && sudo pacman -S --needed base-devel astyle glib2 ncurses
+        sudo pacman -Syy && sudo pacman -S --needed base-devel astyle bzip2 glib2 ncurses
         sudo ln -s /usr/lib/libncursesw.so.6.1 /usr/lib/libncursesw.so.5
         sudo ln -s /usr/lib/libtinfo.so.6 /usr/lib/libtinfo.so.5
     elif [ "$os" = 'RPM-DNF' ]
@@ -94,7 +94,7 @@ function install_cataclysm_compile() {
       git clone https://github.com/CleverRaven/Cataclysm-DDA.git
       cd ./Cataclysm-DDA
       make clean
-      make -j $threads CLANG=1 CCACHE=1 LTO=1 LOCALIZE=0 RELEASE=1 USE_HOME_DIR=1
+      make -j $threads CLANG=1 CCACHE=1 LTO=1 LOCALIZE=0 RELEASE=1
   elif [ "$ver" = 'Tiles' ]
     then
       echo "Installing needed dependencies"
@@ -116,7 +116,7 @@ function install_cataclysm_compile() {
       git clone https://github.com/CleverRaven/Cataclysm-DDA.git
       cd ./Cataclysm-DDA
       make clean
-      make -j $threads CLANG=1 CCACHE=1 LTO=1 LOCALIZE=0 RELEASE=1 TILES=1 SOUND=1 USE_HOME_DIR=1
+      make -j $threads CLANG=1 CCACHE=1 LTO=1 LOCALIZE=0 RELEASE=1 TILES=1 SOUND=1
     fi
     sleep 5
   fi
@@ -205,7 +205,7 @@ function update_cataclysm_compile() {
     mv ./* ./previous_version 2>/dev/null
     git pull
     make clean
-    make -j $threads CLANG=1 CCACHE=1 LTO=1 LOCALIZE=0 RELEASE=1 USE_HOME_DIR=1
+    make -j $threads CLANG=1 CCACHE=1 LTO=1 LOCALIZE=0 RELEASE=1
 elif [ "$ver" = 'Tiles' ]
   then
     cd ./Cataclysm-DDA
@@ -213,7 +213,7 @@ elif [ "$ver" = 'Tiles' ]
     mv ./* ./previous_version 2>/dev/null
     git pull
     make clean
-    make -j $threads CLANG=1 CCACHE=1 LTO=1 LOCALIZE=0 RELEASE=1 TILES=1 SOUND=1 USE_HOME_DIR=1
+    make -j $threads CLANG=1 CCACHE=1 LTO=1 LOCALIZE=0 RELEASE=1 TILES=1 SOUND=1
   fi
 }
 
