@@ -1,4 +1,4 @@
 #!/bin/bash
 
-#sed -i "s|^ROLLBACK=(.*)|ROLLBACK=($(echo ${ROLLBACK[@]}))|g" ./config.sh
-ROLLBACK=(saves saves_backup graveyard)
+#sed -i "s|^rollback=(.*)|rollback=($(echo ${rollback[@]}))|g" ./config.sh
+rollback=(saves saves_backup graveyard)

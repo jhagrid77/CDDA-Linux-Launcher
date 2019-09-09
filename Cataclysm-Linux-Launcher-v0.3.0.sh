@@ -1,26 +1,26 @@
 #!/bin/bash
 
-VERSION=0.3.0
+version=0.3.1
 
 if type apt-get >/dev/null 2>&1
 then
-  OS=Debian
+  os=Debian
 elif type pacman >/dev/null 2>&1
 then
-  OS=Arch
+  os=Arch
 elif type dnf >/dev/null 2>&1
 then
-  OS=RPM-DNF
+  os=RPM-DNF
   #elif type zypper >/dev/null 2>&1
   #then
-  #  OS=RPM-ZYPPER
+  #  os=RPM-ZYPPER
 elif type yum >/dev/null 2>&1
 then
-  OS=RPM-YUM
+  os=RPM-YUM
 fi
 
-ARCH=$(uname -m)
-THREADS=$(($(nproc)/2))
+arch=$(uname -m)
+threads=$(($(nproc)/2))
 
 if [ -f config.sh ]
 then
@@ -31,10 +31,10 @@ else
 fi
 
 function run_cataclysm() {
-  if [ "$INSTALL" = 'Binary' ]
+  if [ "$install" = 'Binary' ]
   then
     ./cataclysmdda/cataclysm-launcher 2> ./cataclysmdda/cataclysm.log
-elif [ "$INSTALL" = 'Compile' ]
+elif [ "$install" = 'Compile' ]
   then
     ./Cataclysm-DDA/cataclysm-launcher 2> ./Cataclysm-DDA/cataclysm.log
   fi
@@ -43,148 +43,148 @@ elif [ "$INSTALL" = 'Compile' ]
 function update_launcher() {
   echo "Checking for updates"
   wget -nc https://github.com/jhagrid77/CDDA-Ubuntu-Launcher/releases 2> /dev/null
-  LATEST=$(cat releases | grep /jhagrid77/CDDA-Ubuntu-Launcher/releases/download | head -n 1 | tr '"' ' ' | awk '{print $3}' | awk -F "/" '{sub("v", ""); print $6}')
-  VERSION_COMPARABLE=$(echo "$VERSION" | tr -d ".")
-  LATEST_COMPARABLE=$(echo "$LATEST" | tr -d ".")
+  latest=$(cat releases | grep /jhagrid77/CDDA-Ubuntu-Launcher/releases/download | head -n 1 | tr '"' ' ' | awk '{print $3}' | awk -F "/" '{sub("v", ""); print $6}')
+  function version_gt() { test "$(printf '%s\n' "$@" | sort -V | head -n 1)" != "$1"; }
   rm ./releases
 
-  if [[ "$VERSION_COMPARABLE" -ge "$LATEST_COMPARABLE" ]]
+  if ! [[ "$version" = "$latest " ]]
   then
-    echo "Latest Version Verified"
-  else
-    echo "Cataclysm-Linux-Launcher Version $VERSION_MAJOR.$VERSION_MINOR.$VERSION_PATCH is obsolete.  Latest version available is $LATEST"
-    read -n 1 -p "Would you like to update the Linux launcher to the latest version? (Please enter Y or N): " UPDATE
-    echo ""
-    if [[ ( "$UPDATE" = 'Y' ) || ( "$UPDATE" = 'y' ) ]]
+    if version_gt $version $latest
     then
-      wget -nc -q https://github.com/jhagrid77/CDDA-Ubuntu-Launcher/releases/download/v$LATEST/Cataclysm-Linux-Launcher-v"$LATEST".tar.gz
-      tar -xvzf Cataclysm-Linux-Launcher-v"$LATEST".tar.gz
-      chmod u+x ./Cataclysm-Linux-Launcher-v"$LATEST".sh
-      exec ./Cataclysm-Linux-Launcher-v"$LATEST".sh
-      exit 0
+      echo "Latest Version Verified"
+    else
+      echo "Cataclysm-Linux-Launcher Version $version is obsolete.  Latest version available is $latest"
+      read -n 1 -p "Would you like to update the Linux launcher to the latest version? (Please enter Y or N): " update
+      echo ""
+      if [[ ( "$update" = 'Y' ) || ( "$update" = 'y' ) ]]
+      then
+        wget -nc -q https://github.com/jhagrid77/CDDA-Ubuntu-Launcher/releases/download/v$latest/Cataclysm-Linux-Launcher-v"$latest".tar.gz
+        tar -xvzf Cataclysm-Linux-Launcher-v"$latest".tar.gz
+        chmod u+x ./Cataclysm-Linux-Launcher-v"$latest".sh
+        exec ./Cataclysm-Linux-Launcher-v"$latest".sh
+        exit 0
+      fi
     fi
   fi
 }
 
 function install_cataclysm_compile() {
-  if [ "$ARCH" = 'x86_64' ]
+  if [ "$arch" = 'x86_64' ]
   then
-    if [ "$VER" = 'Ncurses' ]
+    if [ "$ver" = 'Ncurses' ]
     then
       echo "Installing needed dependencies"
-      if [ "$OS" = 'Debian' ]
+      if [ "$os" = 'Debian' ]
       then
-        sudo apt-get update && sudo apt-get install -y build-essential astyle clang ccache git zlib libglib2.0-0 lua5.2 ncurses-base
-    elif [ "$OS" = 'Arch' ]
+        sudo apt-get update && sudo apt-get install -y build-essential astyle clang ccache git zlib libglib2.0-0 ncurses-base
+    elif [ "$os" = 'Arch' ]
       then
-        sudo pacman -Syy && sudo pacman -S --needed base-devel astyle glib2 lua ncurses
-        sudo ln -s /usr/lib/liblua5.3.so /usr/lib/liblua5.3.so.0
+        sudo pacman -Syy && sudo pacman -S --needed base-devel astyle glib2 ncurses
         sudo ln -s /usr/lib/libncursesw.so.6.1 /usr/lib/libncursesw.so.5
         sudo ln -s /usr/lib/libtinfo.so.6 /usr/lib/libtinfo.so.5
-    elif [ "$OS" = 'RPM-DNF' ]
+    elif [ "$os" = 'RPM-DNF' ]
       then
-        sudo dnf install astyle.$ARCH glib2.$ARCH lua.$ARCH ncurses.$ARCH
-        #elif [ "$OS" = 'RPM-YAST']
+        sudo dnf install astyle.$arch glib2.$arch ncurses.$arch
+        #elif [ "$os" = 'RPM-YAST']
         #then
-    elif [ "$OS" = 'RPM-YUM' ]
+    elif [ "$os" = 'RPM-YUM' ]
       then
-        sudo yum install astyle.$ARCH glib2.$ARCH lua.$ARCH ncurses.$ARCH
+        sudo yum install astyle.$arch glib2.$arch ncurses.$arch
       fi
       git clone https://github.com/CleverRaven/Cataclysm-DDA.git
       cd ./Cataclysm-DDA
       make clean
-      make -j $THREADS CLANG=1 CCACHE=1 LTO=1 LOCALIZE=0 RELEASE=1 LUA=1 USE_HOME_DIR=1
-  elif [ "$VER" = 'Tiles' ]
+      make -j $threads CLANG=1 CCACHE=1 LTO=1 LOCALIZE=0 RELEASE=1 USE_HOME_DIR=1
+  elif [ "$ver" = 'Tiles' ]
     then
       echo "Installing needed dependencies"
-      if [ "$OS" = 'Debian' ]
+      if [ "$os" = 'Debian' ]
       then
-        sudo apt-get update && sudo apt-get install -y astyle libglib2.0-0 lua5.2 ncurses-base
-    elif [ "$OS" = 'Arch' ]
+        sudo apt-get update && sudo apt-get install -y astyle libglib2.0-0 ncurses-base
+    elif [ "$os" = 'Arch' ]
       then
-        sudo pacman -Syy && sudo pacman -S --needed sdl2_mixer sdl_ttf sdl2_image sdl2 lua
-    elif [ "$OS" = 'RPM-DNF' ]
+        sudo pacman -Syy && sudo pacman -S --needed sdl2_mixer sdl_ttf sdl2_image sdl2
+    elif [ "$os" = 'RPM-DNF' ]
       then
-        sudo dnf install astyle.$ARCH glib2.$ARCH lua.$ARCH ncurses.$ARCH
-        #elif [ "$OS" = 'RPM-YAST']
+        sudo dnf install astyle.$arch glib2.$arch ncurses.$arch
+        #elif [ "$os" = 'RPM-YAST']
         #then
-    elif [ "$OS" = 'RPM-YUM' ]
+    elif [ "$os" = 'RPM-YUM' ]
       then
-        sudo yum install astyle.$ARCH glib2.$ARCH lua.$ARCH ncurses.$ARCH
+        sudo yum install astyle.$arch glib2.$arch ncurses.$arch
       fi
       git clone https://github.com/CleverRaven/Cataclysm-DDA.git
       cd ./Cataclysm-DDA
       make clean
-      make -j $THREADS CLANG=1 CCACHE=1 LTO=1 LOCALIZE=0 RELEASE=1 TILES=1 SOUND=1 LUA=1 USE_HOME_DIR=1
+      make -j $threads CLANG=1 CCACHE=1 LTO=1 LOCALIZE=0 RELEASE=1 TILES=1 SOUND=1 USE_HOME_DIR=1
     fi
     sleep 5
   fi
 }
 
 function install_cataclysm_binary() {
-  if [ "$ARCH" = 'x86_64' ]
+  if [ "$arch" = 'x86_64' ]
   then
     wget -nc -q http://dev.narc.ro/cataclysm/jenkins-latest/Linux_x64/$1/
-    INSTALLABLE=$(cat index.html | awk -F'"' '{print $6}' | grep -E "tar.gz")
+    installable=$(cat index.html | awk -F'"' '{print $6}' | grep -E "tar.gz")
     rm ./index.html
     while true
     do
-      PS3="What version would you like to install?: "
+      ps3="What version would you like to install?: "
       clear
       echo "Install Menu"
-      select INSTALL in $INSTALLABLE "Go Back"
+      select install in $installable "Go Back"
       do
-        case "$INSTALL" in
+        case "$install" in
           cataclysm* )
-            if [ "$VER" = 'Ncurses' ]
+            if [ "$ver" = 'Ncurses' ]
             then
               echo "Installing needed dependencies"
-              if [ "$OS" = 'Debian' ]
+              if [ "$os" = 'Debian' ]
               then
-                sudo apt-get update && sudo apt-get install -y astyle libglib2.0-0 lua5.2 ncurses-base
-            elif [ "$OS" = 'Arch' ]
+                sudo apt-get update && sudo apt-get install -y astyle libglib2.0-0 ncurses-base
+            elif [ "$os" = 'Arch' ]
               then
-                sudo pacman -Syy && sudo pacman -S --needed astyle glib2 lua ncurses
-                sudo ln -s /usr/lib/liblua5.3.so /usr/lib/liblua5.3.so.0
+                sudo pacman -Syy && sudo pacman -S --needed astyle glib2 ncurses
                 sudo ln -s /usr/lib/libncursesw.so.6.1 /usr/lib/libncursesw.so.5
                 sudo ln -s /usr/lib/libtinfo.so.6 /usr/lib/libtinfo.so.5
-            elif [ "$OS" = 'RPM-DNF' ]
+            elif [ "$os" = 'RPM-DNF' ]
               then
-                sudo dnf install astyle.$ARCH glib2.$ARCH lua.$ARCH ncurses.$ARCH
-                #elif [ "$OS" = 'RPM-YAST']
+                sudo dnf install astyle.$arch glib2.$arch ncurses.$arch
+                #elif [ "$os" = 'RPM-YAST']
                 #then
-            elif [ "$OS" = 'RPM-YUM' ]
+            elif [ "$os" = 'RPM-YUM' ]
               then
-                sudo yum install astyle.$ARCH glib2.$ARCH lua.$ARCH ncurses.$ARCH
+                sudo yum install astyle.$arch glib2.$arch ncurses.$arch
               fi
-          elif [ "$VER" = 'Tiles' ]
+          elif [ "$ver" = 'Tiles' ]
             then
               echo "Installing needed dependencies"
-              if [ "$OS" = 'Debian' ]
+              if [ "$os" = 'Debian' ]
               then
-                sudo apt-get update && sudo apt-get install -y astyle libglib2.0-0 lua5.2 ncurses-base
-            elif [ "$OS" = 'Arch' ]
+                sudo apt-get update && sudo apt-get install -y astyle libglib2.0-0 ncurses-base
+            elif [ "$os" = 'Arch' ]
               then
-                sudo pacman -Syy && sudo pacman -S --needed sdl2_mixer sdl_ttf sdl2_image sdl2 lua
-            elif [ "$OS" = 'RPM-DNF' ]
+                sudo pacman -Syy && sudo pacman -S --needed sdl2_mixer sdl_ttf sdl2_image sdl2
+            elif [ "$os" = 'RPM-DNF' ]
               then
-                sudo dnf install astyle.$ARCH glib2.$ARCH lua.$ARCH ncurses.$ARCH
-                #elif [ "$OS" = 'RPM-YAST']
+                sudo dnf install astyle.$arch glib2.$arch ncurses.$arch
+                #elif [ "$os" = 'RPM-YAST']
                 #then
-            elif [ "$OS" = 'RPM-YUM' ]
+            elif [ "$os" = 'RPM-YUM' ]
               then
-                sudo yum install astyle.$ARCH glib2.$ARCH lua.$ARCH ncurses.$ARCH
+                sudo yum install astyle.$arch glib2.$arch ncurses.$arch
               fi
             fi
-            wget -nc -q http://dev.narc.ro/cataclysm/jenkins-latest/Linux_x64/$1/$INSTALL
-            MOVE=$(tar -tf $INSTALL | head -n 1)
-            tar -xvzf $INSTALL
-            rm $INSTALL
-            mv $MOVE cataclysmdda/
+            wget -nc -q http://dev.narc.ro/cataclysm/jenkins-latest/Linux_x64/$1/$install
+            move=$(tar -tf $install | head -n 1)
+            tar -xvzf $install
+            rm $install
+            mv $move cataclysm-dda/
             sleep 5
-            unset $INSTALLABLE
-            unset $INSTALL
-            unset $MOVE
+            unset $installable
+            unset $install
+            unset $move
             source ./config.sh
             break
             ;;
@@ -198,29 +198,33 @@ function install_cataclysm_binary() {
 }
 
 function update_cataclysm_compile() {
-  if [ "$VER" = 'Ncurses' ]
+  if [ "$ver" = 'Ncurses' ]
   then
     cd ./Cataclysm-DDA
+    mkdir previous_version 2>/dev/null
+    mv ./* ./previous_version 2>/dev/null
     git pull
     make clean
-    make -j $THREADS CLANG=1 CCACHE=1 LTO=1 LOCALIZE=0 RELEASE=1 LUA=1 USE_HOME_DIR=1
-elif [ "$VER" = 'Tiles' ]
+    make -j $threads CLANG=1 CCACHE=1 LTO=1 LOCALIZE=0 RELEASE=1 USE_HOME_DIR=1
+elif [ "$ver" = 'Tiles' ]
   then
-    git clone https://github.com/CleverRaven/Cataclysm-DDA.git
-    cd ./Cataclysm
+    cd ./Cataclysm-DDA
+    mkdir previous_version 2>/dev/null
+    mv ./* ./previous_version 2>/dev/null
+    git pull
     make clean
-    make -j $THREADS CLANG=1 CCACHE=1 LTO=1 LOCALIZE=0 RELEASE=1 LUA=1 USE_HOME_DIR=1
+    make -j $threads CLANG=1 CCACHE=1 LTO=1 LOCALIZE=0 RELEASE=1 TILES=1 SOUND=1 USE_HOME_DIR=1
   fi
 }
 
 function update_cataclysm_binary() {
   cd ./cataclysmdda
-  mkdir previous_version
+  mkdir previous_version 2>/dev/null
   mv ./* ./previous_version 2>/dev/null
   cd ..
-  install_cataclysm_binary $VER
+  install_cataclysm_binary $ver
   cd ./cataclysmdda
-  for i in "${ROLLBACK[@]}"
+  for i in "${rollback[@]}"
   do
     cp -r ./previous_version/$i ./
   done
@@ -230,75 +234,75 @@ if [ $# = 0 ]
 then
   while true
   do
-    PS3="What would you like to do?: "
+    ps3="What would you like to do?: "
     clear
     echo "Main Menu"
-    select QUESTION in "Cataclysm" "Backups" "Mods" "Tilesets" "Soundpacks" "Settings" "Update Launcher" "Quit"
+    select question in "Cataclysm" "Backups" "Mods" "Tilesets" "Soundpacks" "Settings" "Update Launcher" "Quit"
     do
-      case "$QUESTION" in
+      case "$question" in
         "Cataclysm")
           while true
           do
-            PS3="What would you like to do?: "
+            ps3="What would you like to do?: "
             clear
             echo "Cataclysm Menu"
-            select QUESTION in "Install Cataclysm" "Compile Cataclysm" "Update Cataclysm" "Launch Cataclysm" "Go Back"
+            select question in "Install Cataclysm" "Compile Cataclysm" "Update Cataclysm" "Launch Cataclysm" "Go Back"
             do
-              case "$QUESTION" in
+              case "$question" in
                 "Install Cataclysm")
                   while true
                   do
-                    PS3="What version of the game would you like to install?: "
+                    ps3="What version of the game would you like to install?: "
                     clear
                     echo "Install Menu"
-                    select VER in "Ncurses" "Tiles" "Go Back"
+                    select ver in "Ncurses" "Tiles" "Go Back"
                     do
-                      case "$VER" in
+                      case "$ver" in
                         "Ncurses")
-                          if ! grep -q "^VER=" ./config.sh
+                          if ! grep -q "^ver=" ./config.sh
                           then
-                            echo "VER=$VER" | tee -a ./config.sh
+                            echo "ver=$ver" | tee -a ./config.sh
                             source ./config.sh
                           fi
-                          if [[ $(cat ./config.sh | grep "^VER=$VER") != VER=* ]]
+                          if [[ $(cat ./config.sh | grep "^ver=$ver") != ver=* ]]
                           then
-                            sed -i "s|^VER=.*|VER=$VER|g" ./config.sh
+                            sed -i "s|^ver=.*|ver=$ver|g" ./config.sh
                             source ./config.sh
                           fi
                           install_cataclysm_binary Curses
-                          if ! grep -q "^INSTALL=" ./config.sh
+                          if ! grep -q "^install=" ./config.sh
                           then
-                            echo "INSTALL=Binary" | tee -a ./config.sh
+                            echo "install=Binary" | tee -a ./config.sh
                             source ./config.sh
                           fi
-                          if [[ $(cat ./config.sh | grep "^INSTALL=Binary") != INSTALL=* ]]
+                          if [[ $(cat ./config.sh | grep "^install=Binary") != install=* ]]
                           then
-                            sed -i "s|^INSTALL=.*|INSTALL=Binary|g" ./config.sh
+                            sed -i "s|^install=.*|install=Binary|g" ./config.sh
                             source ./config.sh
                           fi
                           clear
                           break
                           ;;
                         "Tiles")
-                          if ! grep -q "^VER=" ./config.sh
+                          if ! grep -q "^ver=" ./config.sh
                           then
-                            echo "VER=$VER" | tee -a ./config.sh
+                            echo "ver=$ver" | tee -a ./config.sh
                             source ./config.sh
                           fi
-                          if [[ $(cat ./config.sh | grep "^VER=$VER") != VER=* ]]
+                          if [[ $(cat ./config.sh | grep "^ver=$ver") != ver=* ]]
                           then
-                            sed -i "s|^VER=.*|VER=$VER|g" ./config.sh
+                            sed -i "s|^ver=.*|ver=$ver|g" ./config.sh
                             source ./config.sh
                           fi
                           install_cataclysm_binary Tiles
-                          if ! grep -q "^INSTALL=" ./config.sh
+                          if ! grep -q "^install=" ./config.sh
                           then
-                            echo "INSTALL=Binary" | tee -a ./config.sh
+                            echo "install=Binary" | tee -a ./config.sh
                             source ./config.sh
                           fi
-                          if [[ $(cat ./config.sh | grep "^INSTALL=Binary") != INSTALL=* ]]
+                          if [[ $(cat ./config.sh | grep "^install=Binary") != install=* ]]
                           then
-                            sed -i "s|^INSTALL=.*|INSTALL=Binary|g" ./config.sh
+                            sed -i "s|^install=.*|install=Binary|g" ./config.sh
                             source ./config.sh
                           fi
                           clear
@@ -314,56 +318,56 @@ then
                 "Compile Cataclysm")
                   while true
                   do
-                    PS3="What version of the game would you like to compile?: "
+                    ps3="What version of the game would you like to compile?: "
                     clear
                     echo "Compile Menu"
-                    select VER in "Ncurses" "Tiles" "Go Back"
+                    select ver in "Ncurses" "Tiles" "Go Back"
                     do
-                      case "$VER" in
+                      case "$ver" in
                         "Ncurses")
-                          if ! grep -q "^VER=" ./config.sh
+                          if ! grep -q "^ver=" ./config.sh
                           then
-                            echo "VER=$VER" | tee -a ./config.sh
+                            echo "ver=$ver" | tee -a ./config.sh
                             source ./config.sh
                           fi
-                          if [[ $(cat ./config.sh | grep "^VER=$VER") != VER=* ]]
+                          if [[ $(cat ./config.sh | grep "^ver=$ver") != ver=* ]]
                           then
-                            sed -i "s|^VER=.*|VER=$VER|g" ./config.sh
+                            sed -i "s|^ver=.*|ver=$ver|g" ./config.sh
                             source ./config.sh
                           fi
                           install_cataclysm_compile Ncurses
-                          if ! grep -q "^INSTALL=" ./config.sh
+                          if ! grep -q "^install=" ./config.sh
                           then
-                            echo "INSTALL=Compile" | tee -a ./config.sh
+                            echo "install=Compile" | tee -a ./config.sh
                             source ./config.sh
                           fi
-                          if [[ $(cat ./config.sh | grep "^INSTALL=Compile") != INSTALL=* ]]
+                          if [[ $(cat ./config.sh | grep "^install=Compile") != install=* ]]
                           then
-                            sed -i "s|^INSTALL=.*|INSTALL=Compile|g" ./config.sh
+                            sed -i "s|^install=.*|install=Compile|g" ./config.sh
                             source ./config.sh
                           fi
                           break
                           ;;
                         "Tiles")
-                          if ! grep -q "^VER=" ./config.sh
+                          if ! grep -q "^ver=" ./config.sh
                           then
-                            echo "VER=$VER" | tee -a ./config.sh
+                            echo "ver=$ver" | tee -a ./config.sh
                             source ./config.sh
                           fi
-                          if [[ $(cat ./config.sh | grep "^VER=$VER") != VER=* ]]
+                          if [[ $(cat ./config.sh | grep "^ver=$ver") != ver=* ]]
                           then
-                            sed -i "s|^VER=.*|VER=$VER|g" ./config.sh
+                            sed -i "s|^ver=.*|ver=$ver|g" ./config.sh
                             source ./config.sh
                           fi
                           install_cataclysm_compile Tiles
-                          if ! grep -q "^INSTALL=" ./config.sh
+                          if ! grep -q "^install=" ./config.sh
                           then
-                            echo "INSTALL=Compile" | tee -a ./config.sh
+                            echo "install=Compile" | tee -a ./config.sh
                             source ./config.sh
                           fi
-                          if [[ $(cat ./config.sh | grep "^INSTALL=Compile") != INSTALL=* ]]
+                          if [[ $(cat ./config.sh | grep "^install=Compile") != install=* ]]
                           then
-                            sed -i "s|^INSTALL=.*|INSTALL=Compile|g" ./config.sh
+                            sed -i "s|^install=.*|install=Compile|g" ./config.sh
                             source ./config.sh
                           fi
                           break
@@ -377,10 +381,10 @@ then
                   ;;
                 "Update Cataclysm")
                   source ./config.sh
-                  if [ "$INSTALL" = 'Binary' ]
+                  if [ "$install" = 'Binary' ]
                   then
                     update_cataclysm_binary
-                  elif [ "$INSTALL" = 'Compile' ]
+                  elif [ "$install" = 'Compile' ]
                   then
                     update_cataclysm_compile
                   fi
@@ -418,7 +422,7 @@ then
     done
   done
   #elif [[ $# -gt 0 ]]
-  #   POSITIONAL=()
+  #   positional=()
   #   while [[ $# -gt 0 ]]
   #   do
   #   key="$1"
@@ -430,12 +434,12 @@ then
   #     shift # past value
   #     ;;
   #     -i|--install)
-  #     INSTALL=$2
+  #     install=$2
   #     shift # past argument
   #     shift # past value
   #     ;;
   #     -v|--version)
-  #     VER="$2"
+  #     ver="$2"
   #     shift # past argument
   #     shift # past value
   #     ;;
@@ -448,26 +452,25 @@ then
   #     shift # past value
   #     ;;
   #     *)    # unknown option
-  #     POSITIONAL+=("$1") # save it in an array for later
+  #     positional+=("$1") # save it in an array for later
   #     shift # past argument
   #     ;;
   # esac
   # done
-  # set -- "${POSITIONAL[@]}" # restore positional parameters
+  # set -- "${positional[@]}" # restore positional parameters
   #then
 fi
 
-unset ARCH
-unset INSTALL
-unset INSTALLABLE
-unset LATEST
-unset LATEST_COMPARABLE
-unset MOVE
-unset OS
-unset PS3
-unset QUESTION
-unset ROLLBACK
-unset UPDATE
-unset VER
-unset VERSION
-unset VERSION_COMPARABLE
+unset arch
+unset install
+unset installable
+unset latest
+unset move
+unset os
+unset ps3
+unset question
+unset rollback
+unset threads
+unset update
+unset ver
+unset version
